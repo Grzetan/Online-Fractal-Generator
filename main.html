@@ -26,11 +26,11 @@ const OPERATORS = {'-': 'subtract(', '+': 'add(', '/': 'div('};
 class Operation{
     constructor(type, formula, first_arg_pos){
         this.type = type;
+        let first_arg_ending = 0;
         // If first argument is another operation create a new one
         if(Object.keys(OPERATORS).includes(formula[first_arg_pos])){
             this.first_arg = new Operation(formula[first_arg_pos], formula, first_arg_pos+1);
-
-            this.ending = this.first_arg.ending;
+            first_arg_ending = this.first_arg.ending;
         }
         // If not, find the ending of the number and save it.
         else{
@@ -41,21 +41,21 @@ class Operation{
             }
 
             this.first_arg = formula.substr(first_arg_pos, len);
-
-            this.ending = first_arg_pos + len;
+            first_arg_ending = first_arg_pos + len;
         }
 
         // Set second argument
-        if(Object.keys(OPERATORS).includes(formula[this.ending+1])){
-            console.log("SEC OPE");
-            this.second_arg = new Operation(formula[this.ending+1], formula, ending+2);
+        if(Object.keys(OPERATORS).includes(formula[first_arg_ending+1])){
+            this.second_arg = new Operation(formula[first_arg_ending+1], formula, first_arg_ending+2);
+            this.ending = this.second_arg.ending;
         }else{
-            let len=1;
-            for(let i=this.ending; i<formula.length; i++){
+            let len=0;
+            for(let i=first_arg_ending; i<formula.length; i++){
                 len += 1;
                 if(formula[i] == ' ') break;
             }
-            this.second_arg = formula.substr(this.ending+1, len);
+            this.second_arg = formula.substr(first_arg_ending+1, len);
+            this.ending = first_arg_ending+1+len;
         }
     }
 
@@ -78,7 +78,7 @@ function createFunction(formula){
     return new Function("z", "c", "return " + main_operation.toString());
 }
 
-let formula = "++1 2 3";//"---3 /-4 1 5 7 8";
+let formula = "---3 /-4 1 5 7 8";
 
 const func = createFunction(formula);
 func(5, 6);
