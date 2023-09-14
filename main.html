@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.js" integrity="sha512-JLWfLWde2M173Tt7ju+tBz8OSzcfpCmkwK75AE2ErZYBWxN9143UWlIoHq8KrfBusmLu34d6SmHu3JwJHbufnw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
+var WIDTH = canvas.width;
+var HEIGHT = canvas.height;
+
+let xmin = -2;
+let xmax = 2;
+let ymin = -2;
+let ymax = 2;
+let maxIterations = 20;
+
+const OPERATORS = {'-': 'subtract(', '+': 'add(', '/': 'div('};
+
+class Operation{
+    constructor(type, formula, first_arg_pos){
+        this.type = type;
+        // If first argument is another operation create a new one
+        if(Object.keys(OPERATORS).includes(formula[first_arg_pos])){
+            this.first_arg = new Operation(formula[first_arg_pos], formula, first_arg_pos+1);
+
+            this.ending = this.first_arg.ending;
+        }
+        // If not, find the ending of the number and save it.
+        else{
+            let len=0;
+            for(let i=first_arg_pos+1; i<formula.length; i++){
+                len += 1;
+                if(formula[i] == ' ') break;
+            }
+
+            this.first_arg = formula.substr(first_arg_pos, len);
+
+            this.ending = first_arg_pos + len;
+        }
+
+        // Set second argument
+        if(Object.keys(OPERATORS).includes(formula[this.ending+1])){
+            console.log("SEC OPE");
+            this.second_arg = new Operation(formula[this.ending+1], formula, ending+2);
+        }else{
+            let len=1;
+            for(let i=this.ending; i<formula.length; i++){
+                len += 1;
+                if(formula[i] == ' ') break;
+            }
+            this.second_arg = formula.substr(this.ending+1, len);
+        }
+    }
+
+    toString(){
+        let first = (typeof(this.first_arg) == 'string') ? this.first_arg : this.first_arg.toString();
+        let second = (typeof(this.second_arg) == 'string') ? this.second_arg : this.second_arg.toString();
+        return OPERATORS[this.type] + first + ", " + second + ")";
+    }
+}
+
+function createFunction(formula){
+    console.log(formula);
+    let main_operation;
+
+    let char = formula[0];
+    main_operation = new Operation(char, formula, 1);
+
+    console.log(main_operation.toString());
+
+    return new Function("z", "c", "return " + main_operation.toString());
+}
+
+let formula = "++1 2 3";//"---3 /-4 1 5 7 8";
+
+const func = createFunction(formula);
+func(5, 6);
+
+for(let y=0; y<HEIGHT;y++){
+    for(let x=0; x<WIDTH;x++){
+        let original = math.complex(x/WIDTH * math.abs(xmax - xmin) + xmin, y/HEIGHT * math.abs(ymax - ymin) + ymin);
+        let z  = math.complex(0,0);
+        let i = 0;
+
+        while(i<maxIterations){
+            //Calculate z^2
+            // z = math.eval(`(${z.re} + ${z.im})^2 + (${original.re} + ${original.im})`);
+            z = math.add(math.pow(z, 7), original);
+            //If z is too high (goes to infinity), break out
+            if(math.abs(z) > 5){
+                break;
+            }
+            i++;
+        }
+
+        color = {red: 50, green: 50, blue: 50};
+        if(i == maxIterations){
+            color.red = 0;
+            color.green = 0;
+            color.blue = 0;
+        }else if(i > 1){
+            color.red = (i/maxIterations*255);
+            color.green = 80;
+            color.blue = 100;
+        }
+        ctx.fillStyle = `rgb(${color.red},${color.green},${color.blue})`;
+        ctx.fillRect(x, y, 1, 1); // Fill a single pixel
+    }
+}
+</script>
+</body>
+</html>
