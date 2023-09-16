@@ -21,7 +21,7 @@ let ymin = -2;
 let ymax = 2;
 let maxIterations = 20;
 
-const OPERATORS = {'-': 'subtract(', '+': 'add(', '/': 'div('};
+const OPERATORS = {'-': 'Complex.subtract(', '+': 'Complex.add(', '/': 'Complex.div(', '*': 'Complex.multiply(', '^': 'Complex.pow('};
 
 class Operation{
     constructor(type, formula, first_arg_pos){
@@ -47,7 +47,7 @@ class Operation{
         // Set second argument
         if(Object.keys(OPERATORS).includes(formula[first_arg_ending+1])){
             this.second_arg = new Operation(formula[first_arg_ending+1], formula, first_arg_ending+2);
-            this.ending = this.second_arg.ending;
+            this.ending = a.second_arg.ending;
         }else{
             let len=0;
             for(let i=first_arg_ending; i<formula.length; i++){
@@ -66,8 +66,43 @@ class Operation{
     }
 }
 
-function createFunction(formula){
-    console.log(formula);
+class Complex{
+    constructor(re, im){
+        this.re = re;
+        this.im = im;
+    }
+
+    static abs(a){
+        return a.re*a.re + a.im*a.im;
+    }
+
+    static add(a, b){
+        return new Complex(a.re+b.re, a.im+b.im);
+    }
+
+    static substract(a, b){
+        return new Complex(a.re-b.re, a.im-b.im);
+    }
+
+    static multiply(a, b){
+        return new Complex(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+    }
+
+    static divide(a, b){
+        return new Complex((a.re*b.re + a.im*b.im) / b.re*b.re + b.im*b.im, (a.im*b.re - a.re*b.im) / b.re*b.re + b.im*b.im);
+    }
+
+    static pow(a, power){
+        let out = new Complex(a.re, a.im);
+        let base = new Complex(a.re, a.im);
+        for(let i=0; i<power-1; i++){
+            out = Complex.multiply(out, base);
+        }
+        return out;
+    }
+}
+
+function polishNotation2Code(formula){
     let main_operation;
 
     let char = formula[0];
@@ -78,23 +113,19 @@ function createFunction(formula){
     return new Function("z", "c", "return " + main_operation.toString());
 }
 
-let formula = "---3 /-4 1 5 7 8";
-
-const func = createFunction(formula);
-func(5, 6);
+let formula = "+^z 7 c";
+const func = polishNotation2Code(formula);
 
 for(let y=0; y<HEIGHT;y++){
     for(let x=0; x<WIDTH;x++){
-        let original = math.complex(x/WIDTH * math.abs(xmax - xmin) + xmin, y/HEIGHT * math.abs(ymax - ymin) + ymin);
-        let z  = math.complex(0,0);
+        let c = new Complex(x/WIDTH * math.abs(xmax - xmin) + xmin, y/HEIGHT * math.abs(ymax - ymin) + ymin);
+        let z  = new Complex(0,0);
         let i = 0;
 
         while(i<maxIterations){
-            //Calculate z^2
-            // z = math.eval(`(${z.re} + ${z.im})^2 + (${original.re} + ${original.im})`);
-            z = math.add(math.pow(z, 7), original);
+            z = func(z, c);
             //If z is too high (goes to infinity), break out
-            if(math.abs(z) > 5){
+            if(Complex.abs(z) > 5){
                 break;
             }
             i++;
