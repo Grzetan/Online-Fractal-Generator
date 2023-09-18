@@ -31,13 +31,13 @@ class Operation{
     }
 
     toString(){
-        if(typeof this.first){
-            this.first = this.first.toString();
-        }
+        // if(typeof this.first){
+        //     this.first = this.first.toString();
+        // }
 
-        if(typeof this.second){
-            this.second = this.second.toString();
-        }
+        // if(typeof this.second){
+        //     this.second = this.second.toString();
+        // }
         return OPERATORS[this.type] + this.first + ", " + this.second + ")";
     }
 }
@@ -82,18 +82,24 @@ function polishNotation2Code(formula){
     let splitted = formula.split(' ')
     
     let stack = [];
-    let operations = [];
+    let mainOperation = new Operation();
 
     for(let i=0; i<splitted.length; i++){
-        console.log(splitted[i]);
         if(Object.keys(OPERATORS).includes(splitted[i])){
             // let second = 
-            operations.push(new Operation(splitted[i], stack.shift(), stack.shift()));
-            stack.push(operations.shift());
+            // let first = (stack.length > 0) ? stack.shift() : operations.shift();
+            // let second = (stack.length > 0) ? stack.shift() : operations.shift();
+            
+            let second = stack.pop();
+            let first = stack.pop();
+            let operation = new Operation(splitted[i], first, second);
+            stack.push(operation.toString());
         }else{
             stack.push(splitted[i]);
         }
     }
+
+    console.log(stack);
 
     return new Function("z", "c", "return " + stack[0].toString());
 }
