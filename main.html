@@ -24,45 +24,21 @@ let maxIterations = 20;
 const OPERATORS = {'-': 'Complex.subtract(', '+': 'Complex.add(', '/': 'Complex.div(', '*': 'Complex.multiply(', '^': 'Complex.pow('};
 
 class Operation{
-    constructor(type, formula, first_arg_pos){
+    constructor(type, first, second){
         this.type = type;
-        let first_arg_ending = 0;
-        // If first argument is another operation create a new one
-        if(Object.keys(OPERATORS).includes(formula[first_arg_pos])){
-            this.first_arg = new Operation(formula[first_arg_pos], formula, first_arg_pos+1);
-            first_arg_ending = this.first_arg.ending;
-        }
-        // If not, find the ending of the number and save it.
-        else{
-            let len=0;
-            for(let i=first_arg_pos+1; i<formula.length; i++){
-                len += 1;
-                if(formula[i] == ' ') break;
-            }
-
-            this.first_arg = formula.substr(first_arg_pos, len);
-            first_arg_ending = first_arg_pos + len;
-        }
-
-        // Set second argument
-        if(Object.keys(OPERATORS).includes(formula[first_arg_ending+1])){
-            this.second_arg = new Operation(formula[first_arg_ending+1], formula, first_arg_ending+2);
-            this.ending = a.second_arg.ending;
-        }else{
-            let len=0;
-            for(let i=first_arg_ending; i<formula.length; i++){
-                len += 1;
-                if(formula[i] == ' ') break;
-            }
-            this.second_arg = formula.substr(first_arg_ending+1, len);
-            this.ending = first_arg_ending+1+len;
-        }
+        this.first = first;
+        this.second = second;
     }
 
     toString(){
-        let first = (typeof(this.first_arg) == 'string') ? this.first_arg : this.first_arg.toString();
-        let second = (typeof(this.second_arg) == 'string') ? this.second_arg : this.second_arg.toString();
-        return OPERATORS[this.type] + first + ", " + second + ")";
+        if(typeof this.first){
+            this.first = this.first.toString();
+        }
+
+        if(typeof this.second){
+            this.second = this.second.toString();
+        }
+        return OPERATORS[this.type] + this.first + ", " + this.second + ")";
     }
 }
 
@@ -103,17 +79,26 @@ class Complex{
 }
 
 function polishNotation2Code(formula){
-    let main_operation;
+    let splitted = formula.split(' ')
+    
+    let stack = [];
+    let operations = [];
 
-    let char = formula[0];
-    main_operation = new Operation(char, formula, 1);
+    for(let i=0; i<splitted.length; i++){
+        console.log(splitted[i]);
+        if(Object.keys(OPERATORS).includes(splitted[i])){
+            // let second = 
+            operations.push(new Operation(splitted[i], stack.shift(), stack.shift()));
+            stack.push(operations.shift());
+        }else{
+            stack.push(splitted[i]);
+        }
+    }
 
-    console.log(main_operation.toString());
-
-    return new Function("z", "c", "return " + main_operation.toString());
+    return new Function("z", "c", "return " + stack[0].toString());
 }
 
-let formula = "+^z 7 c";
+let formula = "z 7 ^ c +";
 const func = polishNotation2Code(formula);
 
 for(let y=0; y<HEIGHT;y++){
