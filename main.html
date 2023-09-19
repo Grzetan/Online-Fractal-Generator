@@ -27,6 +27,12 @@ const OPERATORS = {'-': {code: 'Complex.subtract(', associativity: 'left', prece
                    '*': {code: 'Complex.multiply(', associativity: 'left', precedence: 2}, 
                    '^': {code: 'Complex.pow(', associativity: 'right', precedence: 3}};
 
+const FUNCTIONS = {
+    'len': {code: 'Complex.len'},
+    'abs': {code: 'Complex.abs'},
+    'sin': {code: 'Complex.sin'}
+}
+
 class Operation{
     constructor(type, first, second){
         this.type = type;
@@ -45,8 +51,12 @@ class Complex{
         this.im = im;
     }
 
-    static abs(a){
+    static len(a){
         return a.re*a.re + a.im*a.im;
+    }
+
+    static abs(a){
+        return new Complex(math.abs(a.re), math.abs(a.im));
     }
 
     static add(a, b){
@@ -92,9 +102,16 @@ function polishNotation2Code(formula){
         }
     }
 
-    console.log(stack);
+    let output = stack[0].toString();
 
-    return new Function("z", "c", "return " + stack[0].toString());
+    let keys = Object.keys(FUNCTIONS);
+    for(let i=0; i<keys.length; i++){
+        output = output.replace(keys[i], FUNCTIONS[keys[i]].code)
+    }
+
+    console.log(output);
+
+    return new Function("z", "c", "return " + output);
 }
 
 // https://www.andreinc.net/2010/10/05/converting-infix-to-rpn-shunting-yard-algorithm
@@ -136,7 +153,7 @@ function formula2RPN(formula){
     return output.join(' ');
 }
 
-let formula = "z - z ^ 3";//"z ^ 7 + c";
+let formula = "abs(z) ^ 2 + c";
 const RPN = formula2RPN(formula);
 console.log(RPN);
 const func = polishNotation2Code(RPN);
@@ -150,7 +167,7 @@ for(let y=0; y<HEIGHT;y++){
         while(i<maxIterations){
             z = func(z, c);
             //If z is too high (goes to infinity), break out
-            if(Complex.abs(z) > 5){
+            if(Complex.len(z) > 5){
                 break;
             }
             i++;
