@@ -145,7 +145,7 @@ function formula2RPN(formula){
     return output.join(' ');
 }
 
-let formula = "( z ^ 3 - 1 ) / ( z ^ 2 * 3 )";
+let formula = "( z ^ 4 - 1 ) / ( z ^ 3 * 4 )";
 const RPN = formula2RPN(formula);
 console.log(RPN);
 const func = polishNotation2Code(RPN);
@@ -198,9 +198,9 @@ for(let y=0; y<HEIGHT;y++){
         let i = 0;
 
         while(i<40){
-            let delta = z.pow(3).sub(1).div(z.pow(2).mul(3));
+            let delta = func(z);
             //If z is too high (goes to infinity), break out
-            if(Math.abs(delta.re) < 1e-12 || Math.abs(delta.im) < 1e-12){
+            if(delta.abs() < 1e-12){
                 let closestRoot = null;
                 for(let j=0; j<roots.length; j++){
                     let tmp = roots[j].root;
