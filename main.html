@@ -9,225 +9,355 @@
     <canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
 
 <script src="complex.js"></script>
+<script id="vertex-shader-2d" type="notjs">
+ 
+// an attribute will receive data from a buffer
+attribute vec4 a_position;
+
+// all shaders have a main function
+void main() {
+
+    // gl_Position is a special variable a vertex shader
+    // is responsible for setting
+    gl_Position = a_position;
+}
+
+</script>
+
+<script id="fragment-shader-2d" type="notjs">
+
+// fragment shaders don't have a default precision so we need
+// to pick one. mediump is a good default
+precision mediump float;
+
+void main() {
+    // gl_FragColor is a special variable a fragment shader
+    // is responsible for setting
+    gl_FragColor = vec4(1, 0, 0.5, 1); // return reddish-purple
+}
+
+</script>
 <script>
-var canvas = document.getElementById('canvas');
+"use strict";
 
-var ctx = canvas.getContext('2d');
-var WIDTH = canvas.width;
-var HEIGHT = canvas.height;
-
-ctx.fillStyle = 'black';
-ctx.fillRect(0,0, WIDTH, HEIGHT);
-
-let xmin = -2;
-let xmax = 2;
-let ymin = -2;
-let ymax = 2;
-let maxIterations = 20;
-
-const OPERATORS = {'-': {code: '.sub(', associativity: 'left', precedence: 1}, 
-                   '+': {code: '.add(', associativity: 'left', precedence: 1}, 
-                   '/': {code: '.div(', associativity: 'left', precedence: 2}, 
-                   '*': {code: '.mul(', associativity: 'left', precedence: 2}, 
-                   '^': {code: '.pow(', associativity: 'right', precedence: 3}};
-
-const FUNCTIONS = {
-    'len': {code: 'len()'},
-    'abs': {code: 'abs()'},
-    'sin': {code: 'sin()'},
-    'conj': {code: 'conjugate()'},
-    'neg': {code: 'neg()'},
-    'inv': {code: 'inverse()'}
-
-}
-
-class Operation{
-    constructor(type, first, second){
-        this.type = type;
-        this.first = first;
-        this.second = second;
-    }
-
-    toString(){
-        return this.first + OPERATORS[this.type].code + this.second + ")";
-    }
-}
-
-function removeAfterChar(inputString, charToRemove) {
-  const charIndex = inputString.indexOf(charToRemove);
-  
-  if (charIndex !== -1) {
-    return inputString.substring(0, charIndex);
-  }
-  
-  return inputString;
-}
-
-function extractStringInParentheses(inputString) {
-  const regex = /\(([^)]+)\)/;
-  const match = inputString.match(regex);
-
-  if (match && match.length > 1) {
-    return match[1];
+function createShader(gl, type, source) {
+  var shader = gl.createShader(type);
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+  if (success) {
+    return shader;
   }
 
-  return null;
+  console.log(gl.getShaderInfoLog(shader));
+  gl.deleteShader(shader);
 }
 
-function polishNotation2Code(formula){
-    let splitted = formula.split(' ')
-    console.log(splitted);
+function createProgram(gl, vertexShader, fragmentShader) {
+  var program = gl.createProgram();
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.linkProgram(program);
+  var success = gl.getProgramParameter(program, gl.LINK_STATUS);
+  if (success) {
+    return program;
+  }
 
-    for(let i=0; i<splitted.length; i++){
-        let operation = removeAfterChar(splitted[i], '(');
-        if(Object.keys(FUNCTIONS).includes(operation)){
-            let content = extractStringInParentheses(splitted[i]);
-            console.log(content);
-            splitted[i] = content + "." + FUNCTIONS[operation].code;
-        }
-    }
-
-    let stack = [];
-    let mainOperation = new Operation();
-
-    for(let i=0; i<splitted.length; i++){
-        if(Object.keys(OPERATORS).includes(splitted[i])){
-            let second = stack.pop();
-            let first = stack.pop();
-            let operation = new Operation(splitted[i], first, second);
-            stack.push(operation.toString());
-        }else{
-            stack.push(splitted[i]);
-        }
-    }
-
-    let output = stack[0].toString();
-
-    console.log(output);
-
-    return new Function("z", "return " + output);
+  console.log(gl.getProgramInfoLog(program));
+  gl.deleteProgram(program);
 }
 
-// https://www.andreinc.net/2010/10/05/converting-infix-to-rpn-shunting-yard-algorithm
-function formula2RPN(formula){
-    splitted = formula.split(' ');
-    output = [];
-    stack = [];
-    for(let i=0; i<splitted.length; i++){
-        if(Object.keys(OPERATORS).includes(splitted[i])){
-            while(stack.length != 0 && Object.keys(OPERATORS).includes(stack[stack.length-1])){
-                const curr = OPERATORS[splitted[i]];
-                const next = OPERATORS[stack[stack.length-1]];
-                if((curr.associativity == 'left' && next.precedence >= curr.precedence) ||
-                   (curr.associativity == 'right' && next.precedence > curr.precedence)){
-                    output.push(stack.pop());
-                    continue;
-                }
-                break;
-            }
-            stack.push(splitted[i]);
-        }else if(splitted[i] == '('){
-            stack.push(splitted[i]);
-        }else if(splitted[i] == ')'){
-            while(stack.length != 0 && stack[stack.length-1] != '('){
-                output.push(stack.pop());
-            }
-            stack.pop();
-        }else{
-            output.push(splitted[i]);
-        }
-    }
+function main() {
+  // Get A WebGL context
+  var canvas = document.querySelector("#canvas");
+  var gl = canvas.getContext("webgl");
+  if (!gl) {
+    return;
+  }
 
-    while(stack.length != 0){
-        output.push(stack.pop());
-    }
+  // Get the strings for our GLSL shaders
+  var vertexShaderSource = document.querySelector("#vertex-shader-2d").text;
+  var fragmentShaderSource = document.querySelector("#fragment-shader-2d").text;
 
-    return output.join(' ');
+  // create GLSL shaders, upload the GLSL source, compile the shaders
+  var vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+  var fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+
+  // Link the two shaders into a program
+  var program = createProgram(gl, vertexShader, fragmentShader);
+
+  // look up where the vertex data needs to go.
+  var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+
+  // Create a buffer and put three 2d clip space points in it
+  var positionBuffer = gl.createBuffer();
+
+  // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
+  var positions = [
+    0, 0,
+    0, 0.5,
+    0.7, 0,
+  ];
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+  // code above this line is initialization code.
+  // code below this line is rendering code.
+
+//   webglUtils.resizeCanvasToDisplaySize(gl.canvas);
+
+  // Tell WebGL how to convert from clip space to pixels
+  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+  // Clear the canvas
+  gl.clearColor(0, 0, 0, 0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  // Tell it to use our program (pair of shaders)
+  gl.useProgram(program);
+
+  // Turn on the attribute
+  gl.enableVertexAttribArray(positionAttributeLocation);
+
+  // Bind the position buffer.
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
+  // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+  var size = 2;          // 2 components per iteration
+  var type = gl.FLOAT;   // the data is 32bit floats
+  var normalize = false; // don't normalize the data
+  var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+  var offset = 0;        // start at the beginning of the buffer
+  gl.vertexAttribPointer(
+      positionAttributeLocation, size, type, normalize, stride, offset);
+
+  // draw
+  var primitiveType = gl.TRIANGLES;
+  var offset = 0;
+  var count = 3;
+  gl.drawArrays(primitiveType, offset, count);
 }
 
-let formula = "( z ^ 4 - 1 ) / ( z ^ 3 * 4 )";
-const RPN = formula2RPN(formula);
-console.log(RPN);
-const func = polishNotation2Code(RPN);
+main();
 
-// Generate mandelbrot
+// var ctx = canvas.getContext('2d');
+// var WIDTH = canvas.width;
+// var HEIGHT = canvas.height;
 
-// for(let y=0; y<HEIGHT;y++){
-//     for(let x=0; x<WIDTH;x++){
-//         let c = new Complex(x/WIDTH * Math.abs(xmax - xmin) + xmin, y/HEIGHT * Math.abs(ymax - ymin) + ymin);
-//         let z  = new Complex(0,0);
-//         let i = 0;
+// ctx.fillStyle = 'black';
+// ctx.fillRect(0,0, WIDTH, HEIGHT);
 
-//         while(i<maxIterations){
-//             z = func(z, c);
-//             //If z is too high (goes to infinity), break out
-//             if(z.abs() > 5){
-//                 break;
-//             }
-//             i++;
-//         }
+// let xmin = -2;
+// let xmax = 2;
+// let ymin = -2;
+// let ymax = 2;
+// let maxIterations = 20;
 
-//         color = {red: 50, green: 50, blue: 50};
-//         if(i == maxIterations){
-//             color.red = 0;
-//             color.green = 0;
-//             color.blue = 0;
-//         }else if(i > 1){
-//             color.red = (i/maxIterations*255);
-//             color.green = 80;
-//             color.blue = 100;
-//         }
-//         ctx.fillStyle = `rgb(${color.red},${color.green},${color.blue})`;
-//         ctx.fillRect(x, y, 1, 1); // Fill a single pixel
+// const OPERATORS = {'-': {code: '.sub(', associativity: 'left', precedence: 1}, 
+//                    '+': {code: '.add(', associativity: 'left', precedence: 1}, 
+//                    '/': {code: '.div(', associativity: 'left', precedence: 2}, 
+//                    '*': {code: '.mul(', associativity: 'left', precedence: 2}, 
+//                    '^': {code: '.pow(', associativity: 'right', precedence: 3}};
+
+// const FUNCTIONS = {
+//     'len': {code: 'len()'},
+//     'abs': {code: 'abs()'},
+//     'sin': {code: 'sin()'},
+//     'conj': {code: 'conjugate()'},
+//     'neg': {code: 'neg()'},
+//     'inv': {code: 'inverse()'}
+
+// }
+
+// class Operation{
+//     constructor(type, first, second){
+//         this.type = type;
+//         this.first = first;
+//         this.second = second;
+//     }
+
+//     toString(){
+//         return this.first + OPERATORS[this.type].code + this.second + ")";
 //     }
 // }
 
-// Generate netwon fractals
-function getRandomIntInclusive(min=0, max=255) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
-}
+// function removeAfterChar(inputString, charToRemove) {
+//   const charIndex = inputString.indexOf(charToRemove);
+  
+//   if (charIndex !== -1) {
+//     return inputString.substring(0, charIndex);
+//   }
+  
+//   return inputString;
+// }
 
-let roots = []
+// function extractStringInParentheses(inputString) {
+//   const regex = /\(([^)]+)\)/;
+//   const match = inputString.match(regex);
 
-for(let y=0; y<HEIGHT;y++){
-    console.log(y, HEIGHT)
-    for(let x=0; x<WIDTH;x++){
-        let z = new Complex(x/WIDTH * Math.abs(xmax - xmin) + xmin, y/HEIGHT * Math.abs(ymax - ymin) + ymin);
-        let i = 0;
+//   if (match && match.length > 1) {
+//     return match[1];
+//   }
 
-        while(i<40){
-            let delta = func(z);
-            //If z is too high (goes to infinity), break out
-            if(delta.abs() < 1e-12){
-                let closestRoot = null;
-                for(let j=0; j<roots.length; j++){
-                    let tmp = roots[j].root;
-                    let dist = tmp.sub(z);
-                    if(dist.abs() < 1e-8){
-                        closestRoot = roots[j];
-                        break;
-                    }
-                }
+//   return null;
+// }
 
-                if(closestRoot == null){
-                    roots.push({root: z, color: {red: getRandomIntInclusive(), green: getRandomIntInclusive(), blue: getRandomIntInclusive()}});
-                    closestRoot = roots[roots.length-1];
-                }
+// function polishNotation2Code(formula){
+//     let splitted = formula.split(' ')
+//     console.log(splitted);
 
-                ctx.fillStyle = `rgb(${closestRoot.color.red},${closestRoot.color.green},${closestRoot.color.blue})`;
-                ctx.fillRect(x, y, 1, 1);
+//     for(let i=0; i<splitted.length; i++){
+//         let operation = removeAfterChar(splitted[i], '(');
+//         if(Object.keys(FUNCTIONS).includes(operation)){
+//             let content = extractStringInParentheses(splitted[i]);
+//             console.log(content);
+//             splitted[i] = content + "." + FUNCTIONS[operation].code;
+//         }
+//     }
 
-                break;
-            }
-            z = z.sub(delta);
-            i++;
-        }
-    }
-}
+//     let stack = [];
+//     let mainOperation = new Operation();
 
-console.log(roots)
+//     for(let i=0; i<splitted.length; i++){
+//         if(Object.keys(OPERATORS).includes(splitted[i])){
+//             let second = stack.pop();
+//             let first = stack.pop();
+//             let operation = new Operation(splitted[i], first, second);
+//             stack.push(operation.toString());
+//         }else{
+//             stack.push(splitted[i]);
+//         }
+//     }
+
+//     let output = stack[0].toString();
+
+//     console.log(output);
+
+//     return new Function("z", "c", "return " + output);
+// }
+
+// // https://www.andreinc.net/2010/10/05/converting-infix-to-rpn-shunting-yard-algorithm
+// function formula2RPN(formula){
+//     splitted = formula.split(' ');
+//     output = [];
+//     stack = [];
+//     for(let i=0; i<splitted.length; i++){
+//         if(Object.keys(OPERATORS).includes(splitted[i])){
+//             while(stack.length != 0 && Object.keys(OPERATORS).includes(stack[stack.length-1])){
+//                 const curr = OPERATORS[splitted[i]];
+//                 const next = OPERATORS[stack[stack.length-1]];
+//                 if((curr.associativity == 'left' && next.precedence >= curr.precedence) ||
+//                    (curr.associativity == 'right' && next.precedence > curr.precedence)){
+//                     output.push(stack.pop());
+//                     continue;
+//                 }
+//                 break;
+//             }
+//             stack.push(splitted[i]);
+//         }else if(splitted[i] == '('){
+//             stack.push(splitted[i]);
+//         }else if(splitted[i] == ')'){
+//             while(stack.length != 0 && stack[stack.length-1] != '('){
+//                 output.push(stack.pop());
+//             }
+//             stack.pop();
+//         }else{
+//             output.push(splitted[i]);
+//         }
+//     }
+
+//     while(stack.length != 0){
+//         output.push(stack.pop());
+//     }
+
+//     return output.join(' ');
+// }
+
+// let formula = "( z ^ 3 - 1 ) / ( z ^ 2 * 3 ) + c";
+// const RPN = formula2RPN(formula);
+// console.log(RPN);
+// const func = polishNotation2Code(RPN);
+
+// // Generate mandelbrot
+
+// // for(let y=0; y<HEIGHT;y++){
+// //     for(let x=0; x<WIDTH;x++){
+// //         let c = new Complex(x/WIDTH * Math.abs(xmax - xmin) + xmin, y/HEIGHT * Math.abs(ymax - ymin) + ymin);
+// //         let z  = new Complex(0,0);
+// //         let i = 0;
+
+// //         while(i<maxIterations){
+// //             z = func(z, c);
+// //             //If z is too high (goes to infinity), break out
+// //             if(z.abs() > 5){
+// //                 break;
+// //             }
+// //             i++;
+// //         }
+
+// //         color = {red: 50, green: 50, blue: 50};
+// //         if(i == maxIterations){
+// //             color.red = 0;
+// //             color.green = 0;
+// //             color.blue = 0;
+// //         }else if(i > 1){
+// //             color.red = (i/maxIterations*255);
+// //             color.green = 80;
+// //             color.blue = 100;
+// //         }
+// //         ctx.fillStyle = `rgb(${color.red},${color.green},${color.blue})`;
+// //         ctx.fillRect(x, y, 1, 1); // Fill a single pixel
+// //     }
+// // }
+
+// // Generate netwon fractals
+// function getRandomIntInclusive(min=0, max=255) {
+//   min = Math.ceil(min);
+//   max = Math.floor(max);
+//   return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
+// }
+
+// let roots = []
+
+// let c = new Complex(-0.3,0);
+// for(let y=0; y<HEIGHT;y++){
+//     console.log(y, HEIGHT)
+//     for(let x=0; x<WIDTH;x++){
+//         let z = new Complex(x/WIDTH * Math.abs(xmax - xmin) + xmin, y/HEIGHT * Math.abs(ymax - ymin) + ymin);
+//         let i = 0;
+
+//         while(i<100){
+//             let delta = func(z, c);
+//             //If z is too high (goes to infinity), break out
+//             if(delta.abs() < 1e-12){
+//                 let closestRoot = null;
+//                 for(let j=0; j<roots.length; j++){
+//                     let tmp = roots[j].root;
+//                     let dist = tmp.sub(z);
+//                     if(dist.abs() < 1e-8){
+//                         closestRoot = roots[j];
+//                         break;
+//                     }
+//                 }
+
+//                 if(closestRoot == null){
+//                     roots.push({root: z, color: {red: getRandomIntInclusive(), green: getRandomIntInclusive(), blue: getRandomIntInclusive()}});
+//                     closestRoot = roots[roots.length-1];
+//                 }
+
+//                 ctx.fillStyle = `rgb(${closestRoot.color.red},${closestRoot.color.green},${closestRoot.color.blue})`;
+//                 ctx.fillRect(x, y, 1, 1);
+
+//                 break;
+//             }
+//             z = z.sub(delta);
+//             i++;
+//         }
+//     }
+// }
+
+// console.log(roots)
 </script>
 </body>
 </html>
