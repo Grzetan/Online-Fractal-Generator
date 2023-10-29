@@ -20,10 +20,38 @@ void main(void) {
 <script id="fragment-shader" type="notjs">
 precision highp float;
 
+#define add(a, b) vec2(a.x+b.x, a.y+b.x)
+#define substract(a, b) vec2(a.x-b.x, a.y-b.x)
+#define mul(a, b) vec2(a.x*b.x-a.y*b.y, a.x*b.y+a.y*b.x)
+#define div(a, b) vec2(((a.x*b.x+a.y*b.y)/(b.x*b.x+b.y*b.y)),((a.y*b.x-a.x*b.y)/(b.x*b.x+b.y*b.y)))
+
+vec2 pow(vec2 a, float n) {
+  float angle = atan(a.y, a.x);
+  float r = length(a);
+  float real = pow(r, n) * cos(n*angle);
+  float im = pow(r, n) * sin(n*angle);
+  return vec2(real, im);
+}
+
+uniform vec2 u_resolution;
+
 void main(void) {
   vec2 current = gl_FragCoord.xy;
   
-  if(current.x < 100.0){
+  vec2 c = vec2(current.x/u_resolution.x * abs(2.0 - -2.0) + -2.0, current.y/u_resolution.y * abs(2.0 - -2.0) + -2.0);
+  vec2 z  = vec2(0.0,0.0);
+  int i = int(0);
+
+  while(int(i)<int(80)){
+    z = add(pow(z, 2.0), c);
+    //If z is too high (goes to infinity), break out
+    if(length(z) > 5){
+      break;
+    }
+    i++;
+  }
+
+  if(u_resolution.y == 501.0){
     gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
   }else{
     gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
@@ -82,6 +110,10 @@ gl.clearColor(0.0, 0.0, 0.0, 1.0);
 gl.enable(gl.DEPTH_TEST);
 gl.clear(gl.COLOR_BUFFER_BIT);
 gl.viewport(0,0,canvas.width,canvas.height);
+
+// Set uniforms
+const resolution = gl.getUniformLocation(shaderProgram, "u_resolution");
+gl.uniform2f(resolution, canvas.width, canvas.height);
 
 gl.drawArrays(gl.TRIANGLE_FAN, 0, vertices.length / 3);
 
