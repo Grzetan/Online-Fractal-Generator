@@ -10,10 +10,10 @@
 
 <script src="complex.js"></script>
 <script id="vertex-shader" type="notjs">
-attribute vec3 coordinates;
+attribute vec4 coordinates;
 
 void main(void) {
-  gl_Position = vec4(coordinates, 1.0);
+  gl_Position = coordinates;
 }
 </script>
 
@@ -47,7 +47,7 @@ void main() {
   for (int i = 0; i < 80; i++) {
     if (escaped) break;
 
-    z = pow(z,3.0) + c;
+    z = pow(z,2.0) + c;
     iterations = i;
 
     if (length(z) > 2.0) {
@@ -66,7 +66,7 @@ precision mediump float;
 #define substract(a, b) vec2(a.x-b.x, a.y-b.x)
 #define mul(a, b) vec2(a.x*b.x-a.y*b.y, a.x*b.y+a.y*b.x)
 #define div(a, b) vec2(((a.x*b.x+a.y*b.y)/(b.x*b.x+b.y*b.y)),((a.y*b.x-a.x*b.y)/(b.x*b.x+b.y*b.y)))
-#define abs(a) sqrt(a.x*a.x + a.y*a.y)
+#define abs(a) length(a)
 
 vec2 pow(vec2 a, float n) {
   float angle = atan(a.y, a.x);
@@ -80,15 +80,14 @@ uniform vec2 u_resolution;
 
 void main() {
   vec2 uv = gl_FragCoord.xy / u_resolution;
-  vec2 z = uv * 4.0 - vec2(2.0, 2.0);
+  vec2 z = uv * 4.0 - 2.0;
 
   bool escaped = false;
 
   for (int i = 0; i < 100; i++) {
     if (escaped) break;
 
-    vec2 power = mul(z, z);
-    vec2 delta = div(substract(mul(mul(z, z), z), vec2(1.0, 1.0)), vec2(power.x * 3.0, power.y*3.0));
+    vec2 delta = div((pow(z, 3.0) - vec2(1.0, 0.0)), (pow(z, 2.0) * 3.0));
 
     if (abs(delta) < 1e-6) {
       escaped = true;
@@ -109,12 +108,7 @@ if (!gl) {
   console.log("WebGL is not available in your browser.");
 }
 
-const vertices = [
-  -1,1,0, // top left
-  -1,-1,0, // bottom left
-  1,-1,0, // bottom right
-  1,1,0, // top right
-];
+const vertices = [-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1];
 
 // Feed buffers with geometry
 const vertexBuffer = gl.createBuffer();
@@ -127,6 +121,7 @@ gl.bindBuffer(gl.ARRAY_BUFFER, null);
 const vertShader = gl.createShader(gl.VERTEX_SHADER);
 gl.shaderSource(vertShader, document.getElementById("vertex-shader").textContent);
 gl.compileShader(vertShader);
+console.log(gl.getShaderInfoLog(vertShader))
 
 // Feed GPU with FRAGMENT shader and compile
 const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
@@ -144,7 +139,7 @@ gl.useProgram(shaderProgram);
 // Bind shader attribute to buffer
 const coord = gl.getAttribLocation(shaderProgram, "coordinates");
 gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-gl.vertexAttribPointer(coord, 3, gl.FLOAT, false, 0, 0);
+gl.vertexAttribPointer(coord, 2, gl.FLOAT, false, 0, 0);
 gl.enableVertexAttribArray(coord);
 
 // Draw
@@ -157,7 +152,7 @@ gl.viewport(0,0,canvas.width,canvas.height);
 const resolution = gl.getUniformLocation(shaderProgram, "u_resolution");
 gl.uniform2f(resolution, canvas.width, canvas.height);
 
-gl.drawArrays(gl.TRIANGLE_FAN, 0, vertices.length / 3);
+gl.drawArrays(gl.TRIANGLES, 0, 6);
 
 // var ctx = canvas.getContext('2d');
 // var WIDTH = canvas.width;
@@ -172,11 +167,11 @@ gl.drawArrays(gl.TRIANGLE_FAN, 0, vertices.length / 3);
 // let ymax = 2;
 // let maxIterations = 20;
 
-// const OPERATORS = {'-': {code: '.sub(', associativity: 'left', precedence: 1}, 
-//                    '+': {code: '.add(', associativity: 'left', precedence: 1}, 
-//                    '/': {code: '.div(', associativity: 'left', precedence: 2}, 
-//                    '*': {code: '.mul(', associativity: 'left', precedence: 2}, 
-//                    '^': {code: '.pow(', associativity: 'right', precedence: 3}};
+// const OPERATORS = {'-': {code: 'sub(', associativity: 'left', precedence: 1}, 
+//                    '+': {code: 'add(', associativity: 'left', precedence: 1}, 
+//                    '/': {code: 'div(', associativity: 'left', precedence: 2}, 
+//                    '*': {code: 'mul(', associativity: 'left', precedence: 2}, 
+//                    '^': {code: 'pow(', associativity: 'right', precedence: 3}};
 
 // const FUNCTIONS = {
 //     'len': {code: 'len()'},
@@ -196,7 +191,7 @@ gl.drawArrays(gl.TRIANGLE_FAN, 0, vertices.length / 3);
 //     }
 
 //     toString(){
-//         return this.first + OPERATORS[this.type].code + this.second + ")";
+//         return OPERATORS[this.type].code + this.first + ', ' + this.second + ")";
 //     }
 // }
 
@@ -292,7 +287,7 @@ gl.drawArrays(gl.TRIANGLE_FAN, 0, vertices.length / 3);
 //     return output.join(' ');
 // }
 
-// let formula = "( z ^ 3 - 1 ) / ( z ^ 2 * 3 ) + c";
+// let formula = "( z ^ 4.0 - vec2(1.0) ) / ( z ^ 3.0 * vec2(4.0) )";
 // const RPN = formula2RPN(formula);
 // console.log(RPN);
 // const func = polishNotation2Code(RPN);
