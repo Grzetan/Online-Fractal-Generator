@@ -1,4 +1,6 @@
 var canvas = document.getElementById("canvas");
+let button_submit = document.getElementById("formula-submit");
+let formula_input = document.getElementById("formula");
 
 function generateFractal(){
   var gl = canvas.getContext("webgl");
@@ -53,7 +55,11 @@ function generateFractal(){
   gl.drawArrays(gl.TRIANGLES, 0, 6);
 }
 
-generateFractal();
+button_submit.addEventListener('click', (e)=>{
+  generateFractal(formula_input.textContent);
+});
+
+generateFractal("( z ^ 3 - 1 ) / ( 3 * z ^ 2 )");
 
 // var ctx = canvas.getContext('2d');
 // var WIDTH = canvas.width;
