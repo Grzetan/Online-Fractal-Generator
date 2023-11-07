@@ -53,7 +53,6 @@ function extractStringInParentheses(inputString) {
 
 function RPN2Code(formula){
   let splitted = formula.split(' ')
-  console.log(splitted);
 
   for(let i=0; i<splitted.length; i++){
       let operation = removeAfterChar(splitted[i], '(');
@@ -187,106 +186,7 @@ function generateFractal(formula){
 }
 
 button_submit.addEventListener('click', (e)=>{
-  generateFractal(formula_input.textContent);
+  generateFractal(formula_input.value);
 });
 
 generateFractal("( z ^ vec2(3.0,0.0) - vec2(1.0,0.0) ) / ( vec2(3.0,0.0) * z ^ vec2(2.0,0.0) )");
-
-// var ctx = canvas.getContext('2d');
-// var WIDTH = canvas.width;
-// var HEIGHT = canvas.height;
-
-// ctx.fillStyle = 'black';
-// ctx.fillRect(0,0, WIDTH, HEIGHT);
-
-// let xmin = -2;
-// let xmax = 2;
-// let ymin = -2;
-// let ymax = 2;
-// let maxIterations = 20;
-
-
-// let formula = "( z ^ 4.0 - vec2(1.0) ) / ( z ^ 3.0 * vec2(4.0) )";
-// const RPN = formula2RPN(formula);
-// console.log(RPN);
-// const func = polishNotation2Code(RPN);
-
-// // Generate mandelbrot
-
-// // for(let y=0; y<HEIGHT;y++){
-// //     for(let x=0; x<WIDTH;x++){
-// //         let c = new Complex(x/WIDTH * Math.abs(xmax - xmin) + xmin, y/HEIGHT * Math.abs(ymax - ymin) + ymin);
-// //         let z  = new Complex(0,0);
-// //         let i = 0;
-
-// //         while(i<maxIterations){
-// //             z = func(z, c);
-// //             //If z is too high (goes to infinity), break out
-// //             if(z.abs() > 5){
-// //                 break;
-// //             }
-// //             i++;
-// //         }
-
-// //         color = {red: 50, green: 50, blue: 50};
-// //         if(i == maxIterations){
-// //             color.red = 0;
-// //             color.green = 0;
-// //             color.blue = 0;
-// //         }else if(i > 1){
-// //             color.red = (i/maxIterations*255);
-// //             color.green = 80;
-// //             color.blue = 100;
-// //         }
-// //         ctx.fillStyle = `rgb(${color.red},${color.green},${color.blue})`;
-// //         ctx.fillRect(x, y, 1, 1); // Fill a single pixel
-// //     }
-// // }
-
-// // Generate netwon fractals
-// function getRandomIntInclusive(min=0, max=255) {
-//   min = Math.ceil(min);
-//   max = Math.floor(max);
-//   return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
-// }
-
-// let roots = []
-
-// let c = new Complex(-0.3,0);
-// for(let y=0; y<HEIGHT;y++){
-//     console.log(y, HEIGHT)
-//     for(let x=0; x<WIDTH;x++){
-//         let z = new Complex(x/WIDTH * Math.abs(xmax - xmin) + xmin, y/HEIGHT * Math.abs(ymax - ymin) + ymin);
-//         let i = 0;
-
-//         while(i<100){
-//             let delta = func(z, c);
-//             //If z is too high (goes to infinity), break out
-//             if(delta.abs() < 1e-12){
-//                 let closestRoot = null;
-//                 for(let j=0; j<roots.length; j++){
-//                     let tmp = roots[j].root;
-//                     let dist = tmp.sub(z);
-//                     if(dist.abs() < 1e-8){
-//                         closestRoot = roots[j];
-//                         break;
-//                     }
-//                 }
-
-//                 if(closestRoot == null){
-//                     roots.push({root: z, color: {red: getRandomIntInclusive(), green: getRandomIntInclusive(), blue: getRandomIntInclusive()}});
-//                     closestRoot = roots[roots.length-1];
-//                 }
-
-//                 ctx.fillStyle = `rgb(${closestRoot.color.red},${closestRoot.color.green},${closestRoot.color.blue})`;
-//                 ctx.fillRect(x, y, 1, 1);
-
-//                 break;
-//             }
-//             z = z.sub(delta);
-//             i++;
-//         }
-//     }
-// }
-
-// console.log(roots)
