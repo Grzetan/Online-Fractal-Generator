@@ -212,5 +212,4 @@ button_submit.addEventListener('click', (e)=>{
   generateFractal(formula_input.value);
 });
 
-// generateFractal("( z ^ vec2(3.0,0.0) - vec2(1.0,0.0) ) / ( vec2(3.0,0.0) * z ^ vec2(2.0,0.0) )");
 generateFractal("(z^3-1)/(3*z^2)");
