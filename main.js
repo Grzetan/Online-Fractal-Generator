@@ -82,9 +82,22 @@ function RPN2Code(formula){
   return output;
 }
 
+function scalarsToComplex(formula){
+  for(let i=0; i<formula.length; i++){
+    if(!isNaN(formula[i])){
+      formula[i] = "vec2(" + Number(formula[i]).toFixed(6).toString() + ",0.0)";
+    }
+  }
+
+  return formula;
+}
+
 // https://www.andreinc.net/2010/10/05/converting-infix-to-rpn-shunting-yard-algorithm
 function formula2RPN(formula){
   splitted = formula.split(' ');
+  splitted = splitted.filter(a => a != "");
+  splitted = scalarsToComplex(splitted);
+
   output = [];
   stack = [];
   for(let i=0; i<splitted.length; i++){
@@ -129,8 +142,18 @@ function getFragmentShaderWithFormula(formula){
   return code.replaceAll("vec2(0.0) //PASTE FORMULA HERE", formula + ";");
 }
 
+function preprocessFormula(formula){
+  let chars = ['(', ')', '+', '-', '*', '/', '^'];
+  for(let i=0; i<chars.length; i++){
+    formula = formula.split(chars[i]).join(" " + chars[i] + " ");
+  }
+
+  return formula;
+}
+
 function generateFractal(formula){
-  const fractalCode = formula2Code(formula);
+  const preprocessedFormula = preprocessFormula(formula);
+  const fractalCode = formula2Code(preprocessedFormula);
   console.log(fractalCode);
 
   var gl = canvas.getContext("webgl");
@@ -189,4 +212,5 @@ button_submit.addEventListener('click', (e)=>{
   generateFractal(formula_input.value);
 });
 
-generateFractal("( z ^ vec2(3.0,0.0) - vec2(1.0,0.0) ) / ( vec2(3.0,0.0) * z ^ vec2(2.0,0.0) )");
+// generateFractal("( z ^ vec2(3.0,0.0) - vec2(1.0,0.0) ) / ( vec2(3.0,0.0) * z ^ vec2(2.0,0.0) )");
+generateFractal("(z^3-1)/(3*z^2)");

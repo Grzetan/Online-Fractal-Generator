@@ -41,7 +41,7 @@ void main() {
 
   bool escaped = false;
 
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 1000; i++) {
     if (escaped) break;
 
     vec2 delta = vec2(0.0) //PASTE FORMULA HERE
