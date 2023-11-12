@@ -11,10 +11,16 @@ let imag_display = document.getElementById("output_imaginary");
 
 re_input.addEventListener('input', e=>{
   re_display.innerText = re_input.value;
+  generateFractal(formula_input.value, [{name: 'c', real: Number(re_input.value).toFixed(6).toString(), imaginary: Number(imag_input.value).toFixed(6).toString()}]);
 })
 imag_input.addEventListener('input', e=>{
   imag_display.innerText = imag_input.value;
+  generateFractal(formula_input.value, [{name: 'c', real: Number(re_input.value).toFixed(6).toString(), imaginary: Number(imag_input.value).toFixed(6).toString()}]);
 })
+
+button_submit.addEventListener('click', (e)=>{
+  generateFractal(formula_input.value, [{name: 'c', real: Number(re_input.value).toFixed(6).toString(), imaginary: Number(imag_input.value).toFixed(6).toString()}]);
+});
 
 const OPERATORS = {'-': {code: 'subtract(', associativity: 'left', precedence: 1}, 
                    '+': {code: 'add(', associativity: 'left', precedence: 1}, 
@@ -150,8 +156,15 @@ function formula2Code(formula){
   return RPN2Code(formula2RPN(formula));
 }
 
-function getFragmentShaderWithFormula(formula){
+function getFragmentShaderWithFormula(formula, variables){
   let code = window.newtonFragmentShader;
+
+  let variables_code = "vec2 ";
+  for(let i=0; i<variables.length; i++){
+    variables_code += variables[i].name + " = vec2(" + variables[i].real + ", " + variables[i].imaginary + "),";
+  }
+  variables_code = variables_code.slice(0, -1) + ";";
+  code = code.replaceAll("//PASTE VARIABLES HERE", variables_code);
 
   return code.replaceAll("vec2(0.0) //PASTE FORMULA HERE", formula + ";");
 }
@@ -192,7 +205,8 @@ function generateFractal(formula, variables){
   
   // Feed GPU with FRAGMENT shader and compile
   const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
-  gl.shaderSource(fragShader, getFragmentShaderWithFormula(fractalCode));
+  console.log(getFragmentShaderWithFormula(fractalCode, variables))
+  gl.shaderSource(fragShader, getFragmentShaderWithFormula(fractalCode, variables));
   gl.compileShader(fragShader);
   console.log(gl.getShaderInfoLog(fragShader))
   
@@ -222,19 +236,4 @@ function generateFractal(formula, variables){
   gl.drawArrays(gl.TRIANGLES, 0, 6);
 }
 
-button_submit.addEventListener('click', (e)=>{
-  generateFractal(formula_input.value);
-});
-
-canvas.addEventListener('click', e=>{
-  console.log(canvas);
-  const context = canvas.getContext('2d');
-  console.log(context);
-  context.beginPath();
-  context.arc(100,100, 10, 0, 2 * Math.PI, false);
-  context.fillStyle = 'green';
-  context.fill(); 
-
-});
-
-generateFractal("(z^3-1)/(3*z^2)", []);
+generateFractal("(z^3-1)/(3*z^2)", [{name: 'c', real: Number(re_input.value).toFixed(6).toString(), imaginary: Number(imag_input.value).toFixed(6).toString()}]);

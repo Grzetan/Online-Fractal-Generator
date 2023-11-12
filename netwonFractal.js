@@ -47,6 +47,7 @@ void main() {
   for (int i = 0; i < 1000; i++) {
     if (escaped) break;
 
+    //PASTE VARIABLES HERE
     vec2 delta = vec2(0.0) //PASTE FORMULA HERE
     
     // div(subtract(power(z, vec2(3.0, 0.0)), vec2(1.0, 0.0)), mul(power(z, vec2(2.0, 0.0)), vec2(3.0, 0.0)));
