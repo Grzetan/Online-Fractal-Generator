@@ -1,6 +1,20 @@
 var canvas = document.getElementById("canvas");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
 let button_submit = document.getElementById("formula-submit");
 let formula_input = document.getElementById("formula");
+let re_input = document.getElementById("x");
+let imag_input = document.getElementById("y");
+let re_display = document.getElementById("output_real");
+let imag_display = document.getElementById("output_imaginary");
+
+re_input.addEventListener('input', e=>{
+  re_display.innerText = re_input.value;
+})
+imag_input.addEventListener('input', e=>{
+  imag_display.innerText = imag_input.value;
+})
 
 const OPERATORS = {'-': {code: 'subtract(', associativity: 'left', precedence: 1}, 
                    '+': {code: 'add(', associativity: 'left', precedence: 1}, 
@@ -151,7 +165,7 @@ function preprocessFormula(formula){
   return formula;
 }
 
-function generateFractal(formula){
+function generateFractal(formula, variables){
   const preprocessedFormula = preprocessFormula(formula);
   const fractalCode = formula2Code(preprocessedFormula);
   console.log(fractalCode);
@@ -212,4 +226,15 @@ button_submit.addEventListener('click', (e)=>{
   generateFractal(formula_input.value);
 });
 
-generateFractal("(z^3-1)/(3*z^2)");
+canvas.addEventListener('click', e=>{
+  console.log(canvas);
+  const context = canvas.getContext('2d');
+  console.log(context);
+  context.beginPath();
+  context.arc(100,100, 10, 0, 2 * Math.PI, false);
+  context.fillStyle = 'green';
+  context.fill(); 
+
+});
+
+generateFractal("(z^3-1)/(3*z^2)", []);

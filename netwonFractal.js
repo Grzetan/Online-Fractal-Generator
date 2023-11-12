@@ -36,8 +36,11 @@ vec2 power(vec2 z, vec2 w) {
 uniform vec2 u_resolution;
 
 void main() {
+  vec2 start = vec2(-4.0, -4.0);
+  vec2 plane_length = vec2(8.0, 8.0);
+
   vec2 uv = gl_FragCoord.xy / u_resolution;
-  vec2 z = uv * 4.0 - 2.0;
+  vec2 z = vec2(uv.x * plane_length.x + start.x, uv.y * plane_length.y + start.y);
 
   bool escaped = false;
 
