@@ -159,12 +159,24 @@ function formula2Code(formula){
 function getFragmentShaderWithFormula(formula, variables){
   let code = window.newtonFragmentShader;
 
-  let variables_code = "vec2 ";
-  for(let i=0; i<variables.length; i++){
-    variables_code += variables[i].name + " = vec2(" + variables[i].real + ", " + variables[i].imaginary + "),";
-  }
-  variables_code = variables_code.slice(0, -1) + ";";
-  code = code.replaceAll("//PASTE VARIABLES HERE", variables_code);
+  let const_variables_code = "uniform vec2 ";
+  variables.filter(a => a.type == 'const').forEach(e=>{
+    const_variables_code += e.name + ",";
+  });
+  const_variables_code = const_variables_code.slice(0, -1) + ";";
+
+  code = code.replaceAll("//PASTE CONST VARIABLES HERE", const_variables_code);
+
+  let relative_variables_code = "vec2 ";
+  variables.filter(a => a.type == 'relative').forEach(e=>{
+    relative_variables_code += e.name + "=getRelativeValue(uv),";
+  });
+  relative_variables_code = relative_variables_code.slice(0, -1) + ";";
+
+  code = code.replaceAll("//PASTE RELATIVE VARIABLES HERE", relative_variables_code);
+
+  // let relative_variables_code = "vec2 "
+
 
   return code.replaceAll("vec2(0.0) //PASTE FORMULA HERE", formula + ";");
 }
@@ -236,4 +248,5 @@ function generateFractal(formula, variables){
   gl.drawArrays(gl.TRIANGLES, 0, 6);
 }
 
-generateFractal("(z^3-1)/(3*z^2)", [{name: 'c', real: Number(re_input.value).toFixed(6).toString(), imaginary: Number(imag_input.value).toFixed(6).toString()}]);
+generateFractal("(z^3-1)/(3*z^2)", [{name: 'k', type: "relative"},
+                                    {name: 'c', real: "0.0", imaginary: "0.0", type: "const"}]);
