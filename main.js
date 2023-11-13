@@ -23,18 +23,23 @@ class Renderer {
     this.gl.compileShader(this.vertShader);
 
     this.shaderProgram = this.gl.createProgram();
+
+    this.gl.attachShader(this.shaderProgram, this.vertShader);
   }
 
   updateFragmentShader(fragmentShader){
+    if(this.fragShader != undefined){
+      this.gl.detachShader(this.shaderProgram, this.fragShader);
+    }
+    
     // Feed GPU with FRAGMENT shader and compile
-    const fragShader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
-    this.gl.shaderSource(fragShader, fragmentShader);
-    this.gl.compileShader(fragShader);
-    console.log(this.gl.getShaderInfoLog(fragShader))
+    this.fragShader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
+    this.gl.shaderSource(this.fragShader, fragmentShader);
+    this.gl.compileShader(this.fragShader);
+    console.log(this.gl.getShaderInfoLog(this.fragShader))
     
     // Initialize rendering program
-    this.gl.attachShader(this.shaderProgram, this.vertShader);
-    this.gl.attachShader(this.shaderProgram, fragShader);
+    this.gl.attachShader(this.shaderProgram, this.fragShader);
     this.gl.linkProgram(this.shaderProgram);
     this.gl.useProgram(this.shaderProgram);
     
@@ -84,7 +89,7 @@ imag_input.addEventListener('input', e=>{
 })
 
 button_submit.addEventListener('click', (e)=>{
-  // generateFractal(formula_input.value, [{name: 'z', type: "relative"}, {name: 'c', real: Number(re_input.value), imaginary: Number(imag_input.value), type: 'const'}]);
+  generateFractal(formula_input.value, variables);
 });
 
 const OPERATORS = {'-': {code: 'subtract(', associativity: 'left', precedence: 1}, 
@@ -100,7 +105,6 @@ const FUNCTIONS = {
   'conj': {code: 'conjugate()'},
   'neg': {code: 'neg()'},
   'inv': {code: 'inverse()'}
-
 }
 
 class Operation{
@@ -224,21 +228,35 @@ function formula2Code(formula){
 function getFragmentShaderWithFormula(formula, variables){
   let code = window.newtonFragmentShader;
 
+  // Setup const params
   let const_variables_code = "uniform vec2 ";
   variables.filter(a => a.type == 'const').forEach(e=>{
     const_variables_code += e.name + ",";
   });
   const_variables_code = const_variables_code.slice(0, -1) + ";";
-
   code = code.replaceAll("//PASTE CONST VARIABLES HERE", const_variables_code);
 
+  // Setup relative params
   let relative_variables_code = "vec2 ";
   variables.filter(a => a.type == 'relative').forEach(e=>{
     relative_variables_code += e.name + "=getRelativeValue(uv),";
   });
   relative_variables_code = relative_variables_code.slice(0, -1) + ";";
-
   code = code.replaceAll("//PASTE RELATIVE VARIABLES HERE", relative_variables_code);
+
+  // Setup main param
+  var main_param = variables.find(obj => {
+    return obj.main
+  })
+
+  if(main_param == undefined){
+    throw new Error("There is no main variable");
+  }
+
+  code = code.replaceAll("vec(0.0) //PASTE MAIN PARAM HERE ", main_param.name + ";");
+
+  // Replace main param with custom name
+  formula = formula.replaceAll(main_param.name, "main");
 
   return code.replaceAll("vec2(0.0) //PASTE FORMULA HERE", formula + ";");
 }
@@ -255,13 +273,16 @@ function preprocessFormula(formula){
 function generateFractal(formula, variables){
   const preprocessedFormula = preprocessFormula(formula);
   const fractalCode = formula2Code(preprocessedFormula);
-  renderer.updateFragmentShader(getFragmentShaderWithFormula(fractalCode, variables));
-  renderer.render();
+  const fragmentShader = getFragmentShaderWithFormula(fractalCode, variables);
+  console.log(fragmentShader);
+  renderer.updateFragmentShader(fragmentShader);
 
   variables.filter(a => a.type == 'const').forEach(e=>{
     renderer.updateParam(e.name, e.real, e.imaginary);
   });
+
+  renderer.render();
 }
 
-const variables = [{name: 'z', type: "relative"}, {name: 'c', real: 0.0, imaginary: 0.0, type: 'const'}];
-generateFractal("(z^3-1)/(3*z^2)+c", variables);
+const variables = [{name: 'z', type: "relative", main: true}, {name: 'c', real: 1.0, imaginary: 0.0, type: 'const'}];
+generateFractal("(z^3-1)/(3*z^2)", variables);

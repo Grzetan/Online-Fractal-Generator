@@ -48,6 +48,8 @@ void main() {
 
   //PASTE RELATIVE VARIABLES HERE
 
+  vec2 main = vec(0.0) //PASTE MAIN PARAM HERE 
+
   bool escaped = false;
 
   for (int i = 0; i < 1000; i++) {
@@ -58,10 +60,10 @@ void main() {
     if (length(delta) < 1e-6) {
       escaped = true;
     
-      gl_FragColor = vec4((z.x + 2.0) / 4.0, (z.y + 2.0) / 4.0, 1.0, 1.0);
+      gl_FragColor = vec4((main.x + 2.0) / 4.0, (main.y + 2.0) / 4.0, 1.0, 1.0);
     }
 
-    z = z - delta;
+    main -= delta;
   }
 }
 `;
