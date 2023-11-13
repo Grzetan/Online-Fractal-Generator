@@ -25,7 +25,7 @@ export default class Renderer {
         this.shaderProgram = gl.createProgram();
     }
 
-    changefragmentShader(fragmentShader){
+    updateFragmentShader(fragmentShader){
         // Feed GPU with FRAGMENT shader and compile
         const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
         console.log(getFragmentShaderWithFormula(fractalCode, variables))
@@ -56,6 +56,11 @@ export default class Renderer {
 
     render(){
         gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+
+    updateParam(name, re, im){
+        const param = gl.getUniformLocation(this.shaderProgram, name);
+        gl.uniform2f(param, re, im);
     }
     
 }
