@@ -48,8 +48,6 @@ void main() {
 
   //PASTE RELATIVE VARIABLES HERE
 
-  vec2 z = getRelativeValue(uv);
-
   bool escaped = false;
 
   for (int i = 0; i < 1000; i++) {

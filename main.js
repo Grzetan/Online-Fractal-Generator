@@ -1,6 +1,63 @@
-var canvas = document.getElementById("canvas");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+class Renderer {
+  vertices = [-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1];
+
+  constructor (canvas_id) {
+      this.canvas = document.getElementById(canvas_id);
+      this.canvas.width = window.innerWidth;
+      this.canvas.height = window.innerHeight; 
+      this.gl = canvas.getContext("webgl");
+
+      if (!this.gl) {
+        throw new Error("WebGL is not supported in this browser!");
+      }
+
+      // Create buffer
+      this.vertexBuffer = this.gl.createBuffer();
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+      this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.vertices), this.gl.STATIC_DRAW);
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
+
+      // Feed GPU with VERTEX shader and compile
+      this.vertShader = this.gl.createShader(this.gl.VERTEX_SHADER);
+      this.gl.shaderSource(this.vertShader, window.vertexShader);
+      this.gl.compileShader(this.vertShader);
+
+      this.shaderProgram = this.gl.createProgram();
+  }
+
+  changefragmentShader(fragmentShader){
+      // Feed GPU with FRAGMENT shader and compile
+      const fragShader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
+      this.gl.shaderSource(fragShader, fragmentShader);
+      this.gl.compileShader(fragShader);
+      console.log(this.gl.getShaderInfoLog(fragShader))
+      
+      // Initialize rendering program
+      this.gl.attachShader(this.shaderProgram, this.vertShader);
+      this.gl.attachShader(this.shaderProgram, fragShader);
+      this.gl.linkProgram(this.shaderProgram);
+      this.gl.useProgram(this.shaderProgram);
+      
+      // Bind shader attribute to buffer
+      const coord = this.gl.getAttribLocation(this.shaderProgram, "coordinates");
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+      this.gl.vertexAttribPointer(coord, 2, this.gl.FLOAT, false, 0, 0);
+      this.gl.enableVertexAttribArray(coord);
+
+      this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
+      this.gl.enable(this.gl.DEPTH_TEST);
+      this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+      this.gl.viewport(0,0,canvas.width,canvas.height);
+
+      const resolution = this.gl.getUniformLocation(this.shaderProgram, "u_resolution");
+      this.gl.uniform2f(resolution, this.canvas.width, this.canvas.height);
+  }
+
+  render(){
+      this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
+  }
+  
+}
 
 let button_submit = document.getElementById("formula-submit");
 let formula_input = document.getElementById("formula");
@@ -9,17 +66,26 @@ let imag_input = document.getElementById("y");
 let re_display = document.getElementById("output_real");
 let imag_display = document.getElementById("output_imaginary");
 
+const renderer = new Renderer("canvas");
+
 re_input.addEventListener('input', e=>{
-  re_display.innerText = re_input.value;
-  generateFractal(formula_input.value, [{name: 'c', real: Number(re_input.value).toFixed(6).toString(), imaginary: Number(imag_input.value).toFixed(6).toString()}]);
+  // re_display.innerText = re_input.value;
+  // const variable = this.gl.getUniformLocation(shaderProgram, "c");
+  // this.gl.uniform2f(variable, Number(re_input.value), Number(imag_input.value));
+  // this.gl.drawArrays(this.gl.TRIANthis.glES, 0, 6);
+  // generateFractal(formula_input.value, [{name: 'z', type: "relative"}, {name: 'c', real: Number(re_input.value), imaginary: Number(imag_input.value), type: 'const'}]);
 })
 imag_input.addEventListener('input', e=>{
-  imag_display.innerText = imag_input.value;
-  generateFractal(formula_input.value, [{name: 'c', real: Number(re_input.value).toFixed(6).toString(), imaginary: Number(imag_input.value).toFixed(6).toString()}]);
+  // imag_display.innerText = imag_input.value;
+  // const variable = this.gl.getUniformLocation(shaderProgram, "c");
+  // this.gl.uniform2f(variable, Number(re_input.value), Number(imag_input.value));
+  // this.gl.drawArrays(this.gl.TRIANthis.glES, 0, 6);
+
+  // generateFractal(formula_input.value, [{name: 'z', type: "relative"}, {name: 'c', real: Number(re_input.value), imaginary: Number(imag_input.value), type: 'const'}]);
 })
 
 button_submit.addEventListener('click', (e)=>{
-  generateFractal(formula_input.value, [{name: 'c', real: Number(re_input.value).toFixed(6).toString(), imaginary: Number(imag_input.value).toFixed(6).toString()}]);
+  // generateFractal(formula_input.value, [{name: 'z', type: "relative"}, {name: 'c', real: Number(re_input.value), imaginary: Number(imag_input.value), type: 'const'}]);
 });
 
 const OPERATORS = {'-': {code: 'subtract(', associativity: 'left', precedence: 1}, 
@@ -193,60 +259,15 @@ function preprocessFormula(formula){
 function generateFractal(formula, variables){
   const preprocessedFormula = preprocessFormula(formula);
   const fractalCode = formula2Code(preprocessedFormula);
-  console.log(fractalCode);
+  renderer.changefragmentShader(getFragmentShaderWithFormula(fractalCode, variables));
+  renderer.render();
 
-  var gl = canvas.getContext("webgl");
-
-  if (!gl) {
-    console.log("WebGL is not available in your browser.");
-  }
-  
-  const vertices = [-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1];
-  
-  // Feed buffers with geometry
-  const vertexBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-  gl.bindBuffer(gl.ARRAY_BUFFER, null);
-  
-  // Feed GPU with VERTEX shader and compile
-  const vertShader = gl.createShader(gl.VERTEX_SHADER);
-  gl.shaderSource(vertShader, window.vertexShader);
-  gl.compileShader(vertShader);
-  console.log(gl.getShaderInfoLog(vertShader))
-  
-  // Feed GPU with FRAGMENT shader and compile
-  const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
-  console.log(getFragmentShaderWithFormula(fractalCode, variables))
-  gl.shaderSource(fragShader, getFragmentShaderWithFormula(fractalCode, variables));
-  gl.compileShader(fragShader);
-  console.log(gl.getShaderInfoLog(fragShader))
-  
-  // Initialize rendering program
-  const shaderProgram = gl.createProgram();
-  gl.attachShader(shaderProgram, vertShader);
-  gl.attachShader(shaderProgram, fragShader);
-  gl.linkProgram(shaderProgram);
-  gl.useProgram(shaderProgram);
-  
-  // Bind shader attribute to buffer
-  const coord = gl.getAttribLocation(shaderProgram, "coordinates");
-  gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-  gl.vertexAttribPointer(coord, 2, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(coord);
-  
-  // Draw
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
-  gl.enable(gl.DEPTH_TEST);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.viewport(0,0,canvas.width,canvas.height);
-  
-  // Set uniforms
-  const resolution = gl.getUniformLocation(shaderProgram, "u_resolution");
-  gl.uniform2f(resolution, canvas.width, canvas.height);
-  
-  gl.drawArrays(gl.TRIANGLES, 0, 6);
+  // variables.filter(a => a.type == 'const').forEach(e=>{
+  //   const variable = this.gl.getUniformLocation(shaderProgram, e.name);
+  //   this.gl.uniform2f(variable, e.real, e.imaginary);
+  // });
 }
 
-generateFractal("(z^3-1)/(3*z^2)", [{name: 'k', type: "relative"},
-                                    {name: 'c', real: "0.0", imaginary: "0.0", type: "const"}]);
+const formula = "(z^3-1)/(3*z^2)+c";
+const variables = [{name: 'z', type: "relative"}, {name: 'c', real: 0.0, imaginary: 0.0, type: 'const'}];
+generateFractal(formula, variables);
