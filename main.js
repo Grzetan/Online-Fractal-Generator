@@ -81,11 +81,11 @@ const renderer = new Renderer("canvas");
 
 re_input.addEventListener('input', e=>{
   re_display.innerText = re_input.value;
-  renderer.updateParam('c', Number(re_input.value), Number(imag_input.value));
+  renderer.updateParam('z', Number(re_input.value), Number(imag_input.value));
 })
 imag_input.addEventListener('input', e=>{
   imag_display.innerText = imag_input.value;
-  renderer.updateParam('c', Number(re_input.value), Number(imag_input.value));
+  renderer.updateParam('z', Number(re_input.value), Number(imag_input.value));
 })
 
 button_submit.addEventListener('click', (e)=>{
@@ -284,5 +284,5 @@ function generateFractal(formula, variables){
   renderer.render();
 }
 
-const variables = [{name: 'z', type: "relative", main: true}, {name: 'c', real: 1.0, imaginary: 0.0, type: 'const'}];
-generateFractal("(z^3-1)/(3*z^2)", variables);
+const variables = [{name: 'c', type: "relative"}, {name: 'z', real: 1.0, imaginary: 0.0, type: 'const', main: true}];
+generateFractal("(z^3-1)/(3*z^2)+c", variables);

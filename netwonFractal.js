@@ -1,8 +1,8 @@
 window.newtonFragmentShader = `
 precision mediump float;
 
-vec2 start = vec2(-4.0, -3.0);
-vec2 plane_length = vec2(8.0, 6.0);
+vec2 start = vec2(-2.0, -1.5);
+vec2 plane_length = vec2(4.0, 3.0);
 
 vec2 add(vec2 a, vec2 b){
   return a + b;
@@ -52,18 +52,25 @@ void main() {
 
   bool escaped = false;
 
-  for (int i = 0; i < 1000; i++) {
+  int iterations = 0;
+
+  for (int i = 0; i < 500; i++) {
     if (escaped) break;
 
     vec2 delta = vec2(0.0) //PASTE FORMULA HERE
     
+    iterations++;
+
     if (length(delta) < 1e-6) {
       escaped = true;
     
-      gl_FragColor = vec4((main.x + 2.0) / 4.0, (main.y + 2.0) / 4.0, 1.0, 1.0);
+      //gl_FragColor = vec4((main.x + 2.0) / 4.0, (main.y + 2.0) / 4.0, 1.0, 1.0);
     }
 
     main -= delta;
   }
+
+  gl_FragColor = escaped ? vec4(vec3(float(iterations)) / 500.0, 1.0) : vec4(vec3(0.0), 1.0);
+
 }
 `;
