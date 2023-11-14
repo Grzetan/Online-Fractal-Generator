@@ -81,16 +81,32 @@ const renderer = new Renderer("canvas");
 
 re_input.addEventListener('input', e=>{
   re_display.innerText = re_input.value;
-  renderer.updateParam('z', Number(re_input.value), Number(imag_input.value));
+  renderer.updateParam('c', Number(re_input.value), Number(imag_input.value));
 })
 imag_input.addEventListener('input', e=>{
   imag_display.innerText = imag_input.value;
-  renderer.updateParam('z', Number(re_input.value), Number(imag_input.value));
+  renderer.updateParam('c', Number(re_input.value), Number(imag_input.value));
 })
 
 button_submit.addEventListener('click', (e)=>{
   generateFractal(formula_input.value, variables);
 });
+
+const TYPES = {
+  STATIC: 'const',
+  RELATIVE: 'relative'
+}
+
+const ITERATION_METHOD = {
+  RECURSION: "recursion",
+  ADDITION: "addition",
+  SUBTRACTION: "subtraction"
+}
+
+const COLOR_METHOD = {
+  ITERATIONS: "iterations",
+  ROOTS: "roots"
+}
 
 const OPERATORS = {'-': {code: 'subtract(', associativity: 'left', precedence: 1}, 
                    '+': {code: 'add(', associativity: 'left', precedence: 1}, 
@@ -153,7 +169,6 @@ function RPN2Code(formula){
   }
 
   let stack = [];
-  let mainOperation = new Operation();
 
   for(let i=0; i<splitted.length; i++){
     if(Object.keys(OPERATORS).includes(splitted[i])){
@@ -230,7 +245,7 @@ function getFragmentShaderWithFormula(formula, variables){
 
   // Setup const params
   let const_variables_code = "uniform vec2 ";
-  variables.filter(a => a.type == 'const').forEach(e=>{
+  variables.filter(a => a.type == TYPES.STATIC).forEach(e=>{
     const_variables_code += e.name + ",";
   });
   const_variables_code = const_variables_code.slice(0, -1) + ";";
@@ -238,7 +253,7 @@ function getFragmentShaderWithFormula(formula, variables){
 
   // Setup relative params
   let relative_variables_code = "vec2 ";
-  variables.filter(a => a.type == 'relative').forEach(e=>{
+  variables.filter(a => a.type == TYPES.RELATIVE).forEach(e=>{
     relative_variables_code += e.name + "=getRelativeValue(uv),";
   });
   relative_variables_code = relative_variables_code.slice(0, -1) + ";";
@@ -253,7 +268,7 @@ function getFragmentShaderWithFormula(formula, variables){
     throw new Error("There is no main variable");
   }
 
-  code = code.replaceAll("vec(0.0) //PASTE MAIN PARAM HERE ", main_param.name + ";");
+  code = code.replaceAll("vec(0.0) //PASTE MAIN VARIABLE HERE ", main_param.name + ";");
 
   // Replace main param with custom name
   formula = formula.replaceAll(main_param.name, "main");
@@ -276,13 +291,12 @@ function generateFractal(formula, variables){
   const fragmentShader = getFragmentShaderWithFormula(fractalCode, variables);
   console.log(fragmentShader);
   renderer.updateFragmentShader(fragmentShader);
+  renderer.render();
 
-  variables.filter(a => a.type == 'const').forEach(e=>{
+  variables.filter(a => a.type == TYPES.STATIC).forEach(e=>{
     renderer.updateParam(e.name, e.real, e.imaginary);
   });
-
-  renderer.render();
 }
 
-const variables = [{name: 'c', type: "relative"}, {name: 'z', real: 1.0, imaginary: 0.0, type: 'const', main: true}];
+const variables = [{name: 'z', type: TYPES.RELATIVE, main: true}, {name: 'c', real: 1.0, imaginary: 0.0, type: TYPES.STATIC}];
 generateFractal("(z^3-1)/(3*z^2)+c", variables);

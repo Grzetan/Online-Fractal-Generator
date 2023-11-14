@@ -41,6 +41,8 @@ vec2 getRelativeValue(vec2 uv){
 
 uniform vec2 u_resolution;
 
+uniform int render_method;
+
 //PASTE CONST VARIABLES HERE
 
 void main() {
@@ -48,13 +50,13 @@ void main() {
 
   //PASTE RELATIVE VARIABLES HERE
 
-  vec2 main = vec(0.0) //PASTE MAIN PARAM HERE 
+  vec2 main = vec(0.0) //PASTE MAIN VARIABLE HERE 
 
   bool escaped = false;
 
   int iterations = 0;
 
-  for (int i = 0; i < 500; i++) {
+  for (int i = 0; i < 200; i++) {
     if (escaped) break;
 
     vec2 delta = vec2(0.0) //PASTE FORMULA HERE
@@ -63,14 +65,13 @@ void main() {
 
     if (length(delta) < 1e-6) {
       escaped = true;
-    
-      //gl_FragColor = vec4((main.x + 2.0) / 4.0, (main.y + 2.0) / 4.0, 1.0, 1.0);
+      break;
     }
 
     main -= delta;
   }
 
-  gl_FragColor = escaped ? vec4(vec3(float(iterations)) / 500.0, 1.0) : vec4(vec3(0.0), 1.0);
+  gl_FragColor = escaped ? vec4((main.x + 2.0) / 4.0, (main.y + 2.0) / 4.0, 1.0, 1.0) : vec4(vec3(0.0), 1.0);
 
 }
 `;
