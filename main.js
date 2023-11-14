@@ -285,7 +285,7 @@ function preprocessFormula(formula){
   return formula;
 }
 
-function generateFractal(formula, variables){
+function generateFractal(formula, variables, settings){
   const preprocessedFormula = preprocessFormula(formula);
   const fractalCode = formula2Code(preprocessedFormula);
   const fragmentShader = getFragmentShaderWithFormula(fractalCode, variables);
@@ -298,5 +298,9 @@ function generateFractal(formula, variables){
   });
 }
 
-const variables = [{name: 'z', type: TYPES.RELATIVE, main: true}, {name: 'c', real: 1.0, imaginary: 0.0, type: TYPES.STATIC}];
-generateFractal("(z^3-1)/(3*z^2)+c", variables);
+let variables = [{name: 'z', type: TYPES.RELATIVE, main: true}, {name: 'c', real: 1.0, imaginary: 0.0, type: TYPES.STATIC}];
+let settings = {
+  iteration: ITERATION_METHOD.SUBTRACTION,
+  color: COLOR_METHOD.ROOTS
+}
+generateFractal("(z^3-1)/(3*z^2)+c", variables, settings);
