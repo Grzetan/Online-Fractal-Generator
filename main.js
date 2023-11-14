@@ -59,14 +59,28 @@ class Renderer {
   }
 
   render(){
+    const param = this.gl.getUniformLocation(this.shaderProgram, "u_color_method");
+    let val = this.gl.getUniform(this.shaderProgram, param);
+    console.log("color", val)
+    const param2 = this.gl.getUniformLocation(this.shaderProgram, "c");
+    val = this.gl.getUniform(this.shaderProgram, param2);
+    console.log("c", val)
+
+
     this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
   }
 
-  updateParam(name, re, im){
+  updateVariable(name, re, im){
     const param = this.gl.getUniformLocation(this.shaderProgram, name);
     this.gl.uniform2f(param, re, im);
-    this.render();
-}
+    // this.render();
+  }
+
+  updateParam(name, val){
+    const param = this.gl.getUniformLocation(this.shaderProgram, name);
+    this.gl.uniform1i(param, val);
+    // this.render();
+  }
   
 }
 
@@ -74,6 +88,7 @@ let button_submit = document.getElementById("formula-submit");
 let formula_input = document.getElementById("formula");
 let re_input = document.getElementById("x");
 let imag_input = document.getElementById("y");
+let color_input = document.getElementById('color-method');
 let re_display = document.getElementById("output_real");
 let imag_display = document.getElementById("output_imaginary");
 
@@ -81,15 +96,25 @@ const renderer = new Renderer("canvas");
 
 re_input.addEventListener('input', e=>{
   re_display.innerText = re_input.value;
-  renderer.updateParam('c', Number(re_input.value), Number(imag_input.value));
+  renderer.updateVariable('c', Number(re_input.value), Number(imag_input.value));
+  renderer.render();
 })
 imag_input.addEventListener('input', e=>{
   imag_display.innerText = imag_input.value;
-  renderer.updateParam('c', Number(re_input.value), Number(imag_input.value));
+  renderer.updateVariable('c', Number(re_input.value), Number(imag_input.value));
+  renderer.render();
+})
+
+color_input.addEventListener('input', e=>{
+  settings.color = Number(color_input.value);
+  // generateFractal(settings);
+  renderer.updateParam('u_color_method', Number(color_input.value));
+  renderer.render();
 })
 
 button_submit.addEventListener('click', (e)=>{
-  generateFractal(formula_input.value, variables);
+  settings.formula = formula_input.value;
+  generateFractal(settings);
 });
 
 const TYPES = {
@@ -104,8 +129,8 @@ const ITERATION_METHOD = {
 }
 
 const COLOR_METHOD = {
-  ITERATIONS: "iterations",
-  ROOTS: "roots"
+  ROOTS: 1,
+  ITERATIONS: 2
 }
 
 const OPERATORS = {'-': {code: 'subtract(', associativity: 'left', precedence: 1}, 
@@ -285,22 +310,27 @@ function preprocessFormula(formula){
   return formula;
 }
 
-function generateFractal(formula, variables, settings){
-  const preprocessedFormula = preprocessFormula(formula);
+function generateFractal(settings){
+  const preprocessedFormula = preprocessFormula(settings.formula);
   const fractalCode = formula2Code(preprocessedFormula);
-  const fragmentShader = getFragmentShaderWithFormula(fractalCode, variables);
+  const fragmentShader = getFragmentShaderWithFormula(fractalCode, settings.variables);
   console.log(fragmentShader);
   renderer.updateFragmentShader(fragmentShader);
+
+  settings.variables.filter(a => a.type == TYPES.STATIC).forEach(e=>{
+    renderer.updateVariable(e.name, e.real, e.imaginary);
+  });
+
+  renderer.updateParam("u_color_method", settings.color);
+
   renderer.render();
 
-  variables.filter(a => a.type == TYPES.STATIC).forEach(e=>{
-    renderer.updateParam(e.name, e.real, e.imaginary);
-  });
 }
 
-let variables = [{name: 'z', type: TYPES.RELATIVE, main: true}, {name: 'c', real: 1.0, imaginary: 0.0, type: TYPES.STATIC}];
 let settings = {
+  formula: "(z^3-1)/(3*z^2)+c",
   iteration: ITERATION_METHOD.SUBTRACTION,
-  color: COLOR_METHOD.ROOTS
+  color: COLOR_METHOD.ROOTS,
+  variables: [{name: 'z', type: TYPES.RELATIVE, main: true}, {name: 'c', real: 0.0, imaginary: 0.0, type: TYPES.STATIC}]
 }
-generateFractal("(z^3-1)/(3*z^2)+c", variables, settings);
+generateFractal(settings);

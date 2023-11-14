@@ -39,9 +39,9 @@ vec2 getRelativeValue(vec2 uv){
   return vec2(uv.x * plane_length.x + start.x, uv.y * plane_length.y + start.y);
 }
 
-uniform vec2 u_resolution;
+uniform int u_color_method;
 
-uniform int render_method;
+uniform vec2 u_resolution;
 
 //PASTE CONST VARIABLES HERE
 
@@ -71,7 +71,18 @@ void main() {
     main -= delta;
   }
 
-  gl_FragColor = escaped ? vec4((main.x + 2.0) / 4.0, (main.y + 2.0) / 4.0, 1.0, 1.0) : vec4(vec3(0.0), 1.0);
+  // Color by root reached
+  if(u_color_method == 1){
+    gl_FragColor = escaped ? vec4((main.x + 2.0) / 4.0, (main.y + 2.0) / 4.0, 1.0, 1.0) : vec4(vec3(0.0), 1.0);
+  }
+  // Color by iterations it took to escape
+  else if(u_color_method == 2){
+    gl_FragColor = escaped ? vec4((float(iterations) / 200.0), 1.0, 1.0, 1.0) : vec4(vec3(0.0), 1.0);
+  }else{
+    gl_FragColor = vec4(vec3(0.0), 1.0);
+    //gl_FragColor = escaped ? vec4((main.x + 2.0) / 4.0, (main.y + 2.0) / 4.0, 1.0, 1.0) : vec4(vec3(0.0), 1.0);
+
+  }
 
 }
 `;
