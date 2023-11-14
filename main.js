@@ -59,27 +59,17 @@ class Renderer {
   }
 
   render(){
-    const param = this.gl.getUniformLocation(this.shaderProgram, "u_color_method");
-    let val = this.gl.getUniform(this.shaderProgram, param);
-    console.log("color", val)
-    const param2 = this.gl.getUniformLocation(this.shaderProgram, "c");
-    val = this.gl.getUniform(this.shaderProgram, param2);
-    console.log("c", val)
-
-
     this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
   }
 
   updateVariable(name, re, im){
     const param = this.gl.getUniformLocation(this.shaderProgram, name);
     this.gl.uniform2f(param, re, im);
-    // this.render();
   }
 
   updateParam(name, val){
     const param = this.gl.getUniformLocation(this.shaderProgram, name);
     this.gl.uniform1i(param, val);
-    // this.render();
   }
   
 }
@@ -89,6 +79,7 @@ let formula_input = document.getElementById("formula");
 let re_input = document.getElementById("x");
 let imag_input = document.getElementById("y");
 let color_input = document.getElementById('color-method');
+let operation_input = document.getElementById('main-operation');
 let re_display = document.getElementById("output_real");
 let imag_display = document.getElementById("output_imaginary");
 
@@ -107,9 +98,13 @@ imag_input.addEventListener('input', e=>{
 
 color_input.addEventListener('input', e=>{
   settings.color = Number(color_input.value);
-  // generateFractal(settings);
   renderer.updateParam('u_color_method', Number(color_input.value));
   renderer.render();
+})
+
+operation_input.addEventListener('input', e=>{
+  settings.iteration = operation_input.value;
+  generateFractal(settings);
 })
 
 button_submit.addEventListener('click', (e)=>{
@@ -298,6 +293,22 @@ function getFragmentShaderWithFormula(formula, variables){
   // Replace main param with custom name
   formula = formula.replaceAll(main_param.name, "main");
 
+  // Replate main operation
+  let operation = "";
+  switch(settings.iteration){
+    case ITERATION_METHOD.RECURSION:
+      operation = "main = delta;";
+      break;
+    case ITERATION_METHOD.ADDITION:
+      operation = "main += delta;";
+      break;
+    case ITERATION_METHOD.SUBTRACTION:
+      operation = "main -= delta;";
+      break;
+  }
+
+  code = code.replaceAll("//PASTE MAIN OPERATION HERE", operation);
+
   return code.replaceAll("vec2(0.0) //PASTE FORMULA HERE", formula + ";");
 }
 
@@ -324,13 +335,12 @@ function generateFractal(settings){
   renderer.updateParam("u_color_method", settings.color);
 
   renderer.render();
-
 }
 
 let settings = {
   formula: "(z^3-1)/(3*z^2)+c",
   iteration: ITERATION_METHOD.SUBTRACTION,
   color: COLOR_METHOD.ROOTS,
-  variables: [{name: 'z', type: TYPES.RELATIVE, main: true}, {name: 'c', real: 0.0, imaginary: 0.0, type: TYPES.STATIC}]
+  variables: [{name: 'c', type: TYPES.RELATIVE}, {name: 'z', real: 0.0, imaginary: 0.0, type: TYPES.STATIC, main: true}]
 }
 generateFractal(settings);
