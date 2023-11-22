@@ -60,11 +60,13 @@ class Renderer {
 
   render(){
     this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
+    console.log("OKK")
   }
 
   updateVariable(name, re, im){
     const param = this.gl.getUniformLocation(this.shaderProgram, name);
     this.gl.uniform2f(param, re, im);
+    console.log(re, im, name)
   }
 
   updateParam(name, val){
@@ -74,29 +76,123 @@ class Renderer {
   
 }
 
+const TYPES = {
+  STATIC: 'const',
+  RELATIVE: 'relative'
+}
+
+const ITERATION_METHOD = {
+  RECURSION: "recursion",
+  ADDITION: "addition",
+  SUBTRACTION: "subtraction"
+}
+
+const COLOR_METHOD = {
+  ROOTS: 1,
+  ITERATIONS: 2
+}
+
+const ESCAPE_TYPE = {
+  GREATER_THAN: ">",
+  LESS_THAN: "<"
+}
+
+function setupParamsForms(variables){
+  let params_container = document.getElementById('parameters');
+
+  variables.forEach(e=>{
+    let form = document.createElement('div');
+    form.classList.add('param');
+
+    // Name
+    let name = document.createElement('span');
+    name.innerText = e.name;
+    form.appendChild(name);
+
+    // Real input
+    let real = document.createElement('input');
+    real.type = 'number';
+    real.step = 0.01;
+    real.value = 0;
+    real.addEventListener('input', r=>{
+      e.real = Number(real.value);
+      renderer.updateVariable(e.name, e.real, e.imaginary);
+      renderer.render();
+    })
+    real.disabled = e.type == TYPES.RELATIVE;
+    form.appendChild(real);
+
+    // Imaginary input
+    let imag = document.createElement('input');
+    imag.type = 'number';
+    imag.step = 0.01;
+    imag.value = 0;
+    imag.addEventListener('input', r=>{
+      e.imaginary = Number(imag.value);
+      renderer.updateVariable(e.name, e.real, e.imaginary);
+      renderer.render();
+    })
+    imag.disabled = e.type == TYPES.RELATIVE;
+    form.appendChild(imag);
+
+    // Types
+    let type = document.createElement('select');
+    for(const key in TYPES){
+      let option = document.createElement("option");
+      option.value = TYPES[key];
+      option.innerText = TYPES[key];
+      if(TYPES[key] == e.type){
+        option.selected = true;
+      }
+      type.appendChild(option);
+    }
+    type.addEventListener('input', r=>{
+      e.type = type.value;
+      real.disabled = e.type == TYPES.RELATIVE;
+      imag.disabled = e.type == TYPES.RELATIVE;
+      generateFractal(settings);
+    })
+    form.appendChild(type);
+
+    // Main
+    let main = document.createElement('input');
+    main.type = 'radio';
+    main.name = 'main';
+    main.checked = e.main;
+    main.addEventListener('input', r=>{
+      variables.forEach(t=>{
+        t.main = false;
+      });
+      e.main = true;
+      console.log(settings)
+      generateFractal(settings)
+    })
+
+    form.appendChild(main);
+
+    params_container.appendChild(form);
+  })
+}
+
+let settings = {
+  formula: "(z^3-1)/(3*z^2)+c",
+  iteration: ITERATION_METHOD.SUBTRACTION,
+  color: COLOR_METHOD.ROOTS,
+  escape_type: ESCAPE_TYPE.LESS_THAN,
+  escape_value: 1e-6,
+  variables: [{name: 'z', type: TYPES.RELATIVE, main: true}, {name: 'c', type: TYPES.STATIC, real: 0.0, imaginary: 0.0}]
+}
+
+const renderer = new Renderer("canvas");
+
+setupParamsForms(settings.variables);
+
 let button_submit = document.getElementById("formula-submit");
 let formula_input = document.getElementById("formula");
-let re_input = document.getElementById("x");
-let imag_input = document.getElementById("y");
 let color_input = document.getElementById('color-method');
 let operation_input = document.getElementById('main-operation');
 let escape_type_input = document.getElementById("escape-type");
 let escape_value_input = document.getElementById("escape-value");
-let re_display = document.getElementById("output_real");
-let imag_display = document.getElementById("output_imaginary");
-
-const renderer = new Renderer("canvas");
-
-re_input.addEventListener('input', e=>{
-  re_display.innerText = re_input.value;
-  renderer.updateVariable('c', Number(re_input.value), Number(imag_input.value));
-  renderer.render();
-})
-imag_input.addEventListener('input', e=>{
-  imag_display.innerText = imag_input.value;
-  renderer.updateVariable('c', Number(re_input.value), Number(imag_input.value));
-  renderer.render();
-})
 
 color_input.addEventListener('input', e=>{
   settings.color = Number(color_input.value);
@@ -123,27 +219,6 @@ button_submit.addEventListener('click', (e)=>{
   settings.formula = formula_input.value;
   generateFractal(settings);
 });
-
-const TYPES = {
-  STATIC: 'const',
-  RELATIVE: 'relative'
-}
-
-const ITERATION_METHOD = {
-  RECURSION: "recursion",
-  ADDITION: "addition",
-  SUBTRACTION: "subtraction"
-}
-
-const COLOR_METHOD = {
-  ROOTS: 1,
-  ITERATIONS: 2
-}
-
-const ESCAPE_TYPE = {
-  GREATER_THAN: ">",
-  LESS_THAN: "<"
-}
 
 const OPERATORS = {'-': {code: 'subtract(', associativity: 'left', precedence: 1}, 
                    '+': {code: 'add(', associativity: 'left', precedence: 1}, 
@@ -359,12 +434,4 @@ function generateFractal(settings){
   renderer.render();
 }
 
-let settings = {
-  formula: "(z^3-1)/(3*z^2)+c",
-  iteration: ITERATION_METHOD.SUBTRACTION,
-  color: COLOR_METHOD.ROOTS,
-  escape_type: ESCAPE_TYPE.LESS_THAN,
-  escape_value: 1e-6,
-  variables: [{name: 'z', type: TYPES.RELATIVE, main: true}, {name: 'c', real: 0.0, imaginary: 0.0, type: TYPES.STATIC}]
-}
 generateFractal(settings);

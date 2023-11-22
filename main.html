@@ -16,17 +16,17 @@
       padding: 20px;
       background-color: rgba(0, 255, 255, 0.3);
     }
-  </style>
+    
+    .param{
+      border:1px solid #000000;
+    }
+    </style>
 </head>
 <body>
   <canvas id="canvas" width="900" height="900" style="border:1px solid #000000;"></canvas><br>
   <div id="container">
-    <label for="x">c.real:</label><br>
-    <input type="range" id="x" min=-2 max=2 step=0.01><br>
-    <div id="output_real">0</div><br>
-    <label for="y">c.imaginary:</label><br>
-    <input type="range" id="y" min=-2 max=2 step=0.01><br>
-    <div id="output_imaginary">0</div><br>
+    <div id="parameters">
+    </div>
     <select id="color-method">
       <option value="1">By root reached</option>
       <option value="2">By iterations it took to escape</option>
