@@ -63,7 +63,7 @@ void main() {
     
     iterations++;
 
-    if (length(delta) > 2.0) {
+    if (length(delta) /*PASTE ESCAPE HERE*/) {
       escaped = true;
       break;
     }

@@ -80,6 +80,8 @@ let re_input = document.getElementById("x");
 let imag_input = document.getElementById("y");
 let color_input = document.getElementById('color-method');
 let operation_input = document.getElementById('main-operation');
+let escape_type_input = document.getElementById("escape-type");
+let escape_value_input = document.getElementById("escape-value");
 let re_display = document.getElementById("output_real");
 let imag_display = document.getElementById("output_imaginary");
 
@@ -107,6 +109,16 @@ operation_input.addEventListener('input', e=>{
   generateFractal(settings);
 })
 
+escape_type_input.addEventListener('input', e=>{
+  settings.escape_type = escape_type_input.value;
+  generateFractal(settings);
+})
+
+escape_value_input.addEventListener('input', e=>{
+  settings.escape_value = escape_value_input.value;
+  generateFractal(settings);
+})
+
 button_submit.addEventListener('click', (e)=>{
   settings.formula = formula_input.value;
   generateFractal(settings);
@@ -126,6 +138,11 @@ const ITERATION_METHOD = {
 const COLOR_METHOD = {
   ROOTS: 1,
   ITERATIONS: 2
+}
+
+const ESCAPE_TYPE = {
+  GREATER_THAN: ">",
+  LESS_THAN: "<"
 }
 
 const OPERATORS = {'-': {code: 'subtract(', associativity: 'left', precedence: 1}, 
@@ -309,6 +326,11 @@ function getFragmentShaderWithFormula(formula, variables){
 
   code = code.replaceAll("//PASTE MAIN OPERATION HERE", operation);
 
+  // Replace escape condition
+  console.log(settings.escape_type + " " + settings.escape_value);
+  let escape_code = settings.escape_type + " " + settings.escape_value;
+  code = code.replaceAll("/*PASTE ESCAPE HERE*/", escape_code);
+
   return code.replaceAll("vec2(0.0) //PASTE FORMULA HERE", formula + ";");
 }
 
@@ -341,6 +363,8 @@ let settings = {
   formula: "(z^3-1)/(3*z^2)+c",
   iteration: ITERATION_METHOD.SUBTRACTION,
   color: COLOR_METHOD.ROOTS,
-  variables: [{name: 'c', type: TYPES.RELATIVE}, {name: 'z', real: 0.0, imaginary: 0.0, type: TYPES.STATIC, main: true}]
+  escape_type: ESCAPE_TYPE.LESS_THAN,
+  escape_value: 1e-6,
+  variables: [{name: 'z', type: TYPES.RELATIVE, main: true}, {name: 'c', real: 0.0, imaginary: 0.0, type: TYPES.STATIC}]
 }
 generateFractal(settings);
