@@ -56,7 +56,7 @@ void main() {
 
   int iterations = 0;
 
-  for (int i = 0; i < 80; i++) {
+  for (int i = 0; i < 500; i++) {
     if (escaped) break;
 
     vec2 delta = vec2(0.0) //PASTE FORMULA HERE
@@ -77,7 +77,7 @@ void main() {
   }
   // Color by iterations it took to escape
   else if(u_color_method == 2){
-    gl_FragColor = escaped ? vec4((float(iterations) / 80.0), 1.0, 1.0, 1.0) : vec4(vec3(0.0), 1.0);
+    gl_FragColor = escaped ? vec4((float(iterations) / 500.0), 1.0, 1.0, 1.0) : vec4(vec3(0.0), 1.0);
   }else{
     gl_FragColor = vec4(vec3(0.0), 1.0);
     //gl_FragColor = escaped ? vec4((main.x + 2.0) / 4.0, (main.y + 2.0) / 4.0, 1.0, 1.0) : vec4(vec3(0.0), 1.0);

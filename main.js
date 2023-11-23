@@ -148,6 +148,10 @@ function setupParamsForms(variables){
     }
     type.addEventListener('input', r=>{
       e.type = type.value;
+      if(e.type == TYPES.STATIC){
+        e.real = Number(real.value);
+        e.imaginary = Number(imag.value);
+      }
       real.disabled = e.type == TYPES.RELATIVE;
       imag.disabled = e.type == TYPES.RELATIVE;
       generateFractal(settings);
