@@ -184,6 +184,7 @@ let settings = {
   color: COLOR_METHOD.ROOTS,
   escape_type: ESCAPE_TYPE.LESS_THAN,
   escape_value: 1e-6,
+  max_iterations: 500,
   variables: [{name: 'z', type: TYPES.RELATIVE, main: true}, {name: 'c', type: TYPES.STATIC, real: 0.0, imaginary: 0.0}]
 }
 
@@ -197,6 +198,7 @@ let color_input = document.getElementById('color-method');
 let operation_input = document.getElementById('main-operation');
 let escape_type_input = document.getElementById("escape-type");
 let escape_value_input = document.getElementById("escape-value");
+let max_iterations_input = document.getElementById('max-iterations');
 
 color_input.addEventListener('input', e=>{
   settings.color = Number(color_input.value);
@@ -217,6 +219,12 @@ escape_type_input.addEventListener('input', e=>{
 escape_value_input.addEventListener('input', e=>{
   settings.escape_value = escape_value_input.value;
   generateFractal(settings);
+})
+
+max_iterations_input.addEventListener('input', e=>{
+  settings.max_iterations = Number(max_iterations_input.value);
+  renderer.updateParam('max_iterations', settings.max_iterations);
+  renderer.render();
 })
 
 button_submit.addEventListener('click', (e)=>{
@@ -434,6 +442,7 @@ function generateFractal(settings){
   });
 
   renderer.updateParam("u_color_method", settings.color);
+  renderer.updateParam("max_iterations", settings.max_iterations);
 
   renderer.render();
 }

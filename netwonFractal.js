@@ -43,6 +43,8 @@ uniform int u_color_method;
 
 uniform vec2 u_resolution;
 
+uniform int max_iterations;
+
 //PASTE CONST VARIABLES HERE
 
 void main() {
@@ -56,9 +58,11 @@ void main() {
 
   int iterations = 0;
 
-  for (int i = 0; i < 500; i++) {
-    if (escaped) break;
-
+  for (int i = 0; i < 5000; i++) {
+    if (escaped || iterations >= max_iterations){
+      break;
+    }
+    
     vec2 delta = vec2(0.0) //PASTE FORMULA HERE
     
     iterations++;
@@ -77,7 +81,7 @@ void main() {
   }
   // Color by iterations it took to escape
   else if(u_color_method == 2){
-    gl_FragColor = escaped ? vec4((float(iterations) / 500.0), 1.0, 1.0, 1.0) : vec4(vec3(0.0), 1.0);
+    gl_FragColor = escaped ? vec4((float(iterations) / float(max_iterations)), 1.0, 1.0, 1.0) : vec4(vec3(0.0), 1.0);
   }else{
     gl_FragColor = vec4(vec3(0.0), 1.0);
     //gl_FragColor = escaped ? vec4((main.x + 2.0) / 4.0, (main.y + 2.0) / 4.0, 1.0, 1.0) : vec4(vec3(0.0), 1.0);
