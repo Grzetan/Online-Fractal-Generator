@@ -99,6 +99,7 @@ const ESCAPE_TYPE = {
 
 function setupParamsForms(variables){
   let params_container = document.getElementById('parameters');
+  params_container.innerHTML = '';
 
   variables.forEach(e=>{
     let form = document.createElement('div');
@@ -179,13 +180,13 @@ function setupParamsForms(variables){
 }
 
 let settings = {
-  formula: "(z^3-1)/(3*z^2)+c",
+  formula: "(z^3-1)/(3*z^2)",
   iteration: ITERATION_METHOD.SUBTRACTION,
   color: COLOR_METHOD.ROOTS,
   escape_type: ESCAPE_TYPE.LESS_THAN,
   escape_value: 1e-6,
   max_iterations: 500,
-  variables: [{name: 'z', type: TYPES.RELATIVE, main: true}, {name: 'c', type: TYPES.STATIC, real: 0.0, imaginary: 0.0}]
+  variables: [{name: 'z', type: TYPES.RELATIVE, main: true}]
 }
 
 const renderer = new Renderer("canvas");
@@ -199,6 +200,15 @@ let operation_input = document.getElementById('main-operation');
 let escape_type_input = document.getElementById("escape-type");
 let escape_value_input = document.getElementById("escape-value");
 let max_iterations_input = document.getElementById('max-iterations');
+let add_param_btn = document.getElementById('add-param');
+
+let curr = 'a';
+
+add_param_btn.addEventListener('click', e=>{
+  settings.variables.push({name: curr, type: TYPES.RELATIVE});
+  curr = String.fromCharCode(curr.charCodeAt() + 1);
+  setupParamsForms(settings.variables);
+})
 
 color_input.addEventListener('input', e=>{
   settings.color = Number(color_input.value);
