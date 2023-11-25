@@ -95,6 +95,18 @@ window.addEventListener('wheel', e=>{
   renderer.render();
 });
 
+// Buttons
+document.getElementById("toggle-form-button").addEventListener("click", function() {
+  var container = document.getElementById("container");
+  container.style.display = container.style.display === "none" ? "flex" : "none";
+});
+
+let curr_img = 0;
+document.getElementById('save').addEventListener('click', e=>{
+  var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
+  window.location.href=image; // it will save locally
+})
+
 let last_pos = null;
 
 window.addEventListener('mousemove', e=>{
