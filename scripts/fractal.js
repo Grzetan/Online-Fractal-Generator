@@ -1,5 +1,5 @@
 export let fragmentShaderCode = `
-precision mediump float;
+precision highp float;
 
 vec2 add(vec2 a, vec2 b){
   return a + b;

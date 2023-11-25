@@ -66,13 +66,11 @@ export class Renderer {
 
   render() {
     this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
-    console.log('OKK')
   }
 
   updateVariable(name, re, im) {
     const param = this.gl.getUniformLocation(this.shaderProgram, name);
     this.gl.uniform2f(param, re, im);
-    console.log(re, im, name)
   }
 
   updateParam(name, val) {

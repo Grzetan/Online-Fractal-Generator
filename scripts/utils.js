@@ -52,7 +52,6 @@ export function getFragmentShaderWithFormula(formula, settings) {
   code = code.replaceAll(CONSTS.SHADER_STRINGS.MAIN_OPERATION, operation);
 
   // Replace escape condition
-  console.log(settings.escape_type + ' ' + settings.escape_value);
   let escape_code = settings.escape_type + ' ' + Number(settings.escape_value).toFixed(12);
   code = code.replaceAll(CONSTS.SHADER_STRINGS.ESCAPE_CONDITION, escape_code);
 
@@ -60,7 +59,6 @@ export function getFragmentShaderWithFormula(formula, settings) {
 }
 
 export function setupParamsForms(settings, renderer) {
-  console.log(settings.variables)
   let params_container = document.getElementById('parameters');
   params_container.innerHTML = '';
 

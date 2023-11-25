@@ -95,6 +95,30 @@ window.addEventListener('wheel', e=>{
   renderer.render();
 });
 
+let last_pos = null;
+
+window.addEventListener('mousemove', e=>{
+  if(e.buttons != 1){
+    last_pos = null;
+    return;
+  }
+
+  if(last_pos == null){
+    last_pos = {x: e.clientX, y: e.clientY};
+    return;
+  }
+
+  const moved_x_ratio = (e.clientX - last_pos.x) / window.innerWidth;
+  const moved_y_ratio = (e.clientY - last_pos.y) / window.innerHeight;
+  settings.plane_start.x -= moved_x_ratio * settings.plane_length.x;
+  settings.plane_start.y += moved_y_ratio * settings.plane_length.y;
+  renderer.updateVariable("plane_start", settings.plane_start.x, settings.plane_start.y);
+  renderer.render();
+
+  last_pos.x = e.clientX;
+  last_pos.y = e.clientY;
+})
+
 function generateFractal(settings) {
   const fractalCode = formula2Code(settings.formula);
   const fragmentShader = getFragmentShaderWithFormula(fractalCode, settings);

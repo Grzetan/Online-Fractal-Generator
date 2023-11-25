@@ -42,9 +42,7 @@ function RPN2Code(formula) {
   for (let i = 0; i < splitted.length; i++) {
     let operation = removeAfterChar(splitted[i], '[');
     if (Object.keys(CONSTS.FUNCTIONS).includes(operation)) {
-      console.log(splitted[i]);
       let content = extractStringInParentheses(splitted[i]);
-      console.log(content);
       splitted[i] = CONSTS.FUNCTIONS[operation].code + "(" + content + ")";
     }
   }
@@ -122,7 +120,6 @@ function formula2RPN(formula) {
 
 export function formula2Code(formula) {
   formula = preprocessFormula(formula);
-  console.log(formula)
   return RPN2Code(formula2RPN(formula));
 }
 
