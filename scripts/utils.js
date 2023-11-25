@@ -59,11 +59,12 @@ export function getFragmentShaderWithFormula(formula, settings) {
   return code.replaceAll(CONSTS.SHADER_STRINGS.FORMULA, formula + ';');
 }
 
-export function setupParamsForms(variables) {
+export function setupParamsForms(settings) {
+  console.log(settings.variables)
   let params_container = document.getElementById('parameters');
   params_container.innerHTML = '';
 
-  variables.forEach(e => {
+  settings.variables.forEach(e => {
     let form = document.createElement('div');
     form.classList.add('param');
 
@@ -127,15 +128,24 @@ export function setupParamsForms(variables) {
     main.name = 'main';
     main.checked = e.main;
     main.addEventListener('input', r => {
-      variables.forEach(t => {
+      settings.variables.forEach(t => {
         t.main = false;
       });
       e.main = true;
-      console.log(settings)
       generateFractal(settings)
     })
 
     form.appendChild(main);
+
+    if(!e.main){
+      let remove = document.createElement('button');
+      remove.innerText = "Remove";
+      remove.addEventListener('click', r=>{
+        settings.variables = settings.variables.filter(k=>{return k != e});
+        setupParamsForms(settings);
+      })
+      form.append(remove);
+    }
 
     params_container.appendChild(form);
   })

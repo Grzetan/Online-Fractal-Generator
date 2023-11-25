@@ -15,7 +15,7 @@ let settings = {
 
 const renderer = new Renderer('canvas');
 
-setupParamsForms(settings.variables);
+setupParamsForms(settings);
 
 let button_submit = document.getElementById('formula-submit');
 let formula_input = document.getElementById('formula');
@@ -41,7 +41,7 @@ max_iterations_input.value = settings.max_iterations;
 add_param_btn.addEventListener('click', e => {
   settings.variables.push({name: curr, type: CONSTS.TYPES.RELATIVE});
   curr = String.fromCharCode(curr.charCodeAt() + 1);
-  setupParamsForms(settings.variables);
+  setupParamsForms(settings);
 })
 
 color_input.addEventListener('input', e => {

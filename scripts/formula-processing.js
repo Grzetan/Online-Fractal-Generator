@@ -119,6 +119,7 @@ function formula2RPN(formula) {
 
 export function formula2Code(formula) {
   formula = preprocessFormula(formula);
+  console.log(formula)
   return RPN2Code(formula2RPN(formula));
 }
 
