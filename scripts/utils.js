@@ -1,5 +1,6 @@
 import {CONSTS} from './config.js';
 import {fragmentShaderCode} from './fractal.js'
+import { generateFractal } from './main.js';
 
 export function getFragmentShaderWithFormula(formula, settings) {
   let code = fragmentShaderCode;
@@ -72,6 +73,10 @@ export function setupParamsForms(settings, renderer) {
     form.appendChild(name);
 
     // Real input
+    let real_label = document.createElement('label');
+    real_label.innerText = "real: ";
+    form.appendChild(real_label);
+
     let real = document.createElement('input');
     real.type = 'number';
     real.step = 0.01;
@@ -85,6 +90,10 @@ export function setupParamsForms(settings, renderer) {
     form.appendChild(real);
 
     // Imaginary input
+    let imag_label = document.createElement('label');
+    imag_label.innerText = "imag: ";
+    form.appendChild(imag_label);
+
     let imag = document.createElement('input');
     imag.type = 'number';
     imag.step = 0.01;
@@ -121,6 +130,10 @@ export function setupParamsForms(settings, renderer) {
     form.appendChild(type);
 
     // Main
+    let main_label = document.createElement('label');
+    main_label.innerText = "Main: ";
+    form.appendChild(main_label);
+
     let main = document.createElement('input');
     main.type = 'radio';
     main.name = 'main';
@@ -130,17 +143,20 @@ export function setupParamsForms(settings, renderer) {
         t.main = false;
       });
       e.main = true;
-      generateFractal(settings)
+      generateFractal(settings);
+      setupParamsForms(settings, renderer);
     })
 
     form.appendChild(main);
 
+    // Remove
     if(!e.main){
       let remove = document.createElement('button');
       remove.innerText = "Remove";
       remove.addEventListener('click', r=>{
         settings.variables = settings.variables.filter(k=>{return k != e});
         setupParamsForms(settings);
+        generateFractal(settings);
       })
       form.append(remove);
     }

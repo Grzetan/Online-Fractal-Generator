@@ -119,7 +119,7 @@ window.addEventListener('mousemove', e=>{
   last_pos.y = e.clientY;
 })
 
-function generateFractal(settings) {
+export function generateFractal(settings) {
   const fractalCode = formula2Code(settings.formula);
   const fragmentShader = getFragmentShaderWithFormula(fractalCode, settings);
   console.log(fragmentShader);
