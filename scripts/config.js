@@ -20,12 +20,12 @@ export const CONSTS = {
   },
 
   FUNCTIONS: {
-    'len': {code: 'len()'},
-    'abs': {code: 'abs()'},
-    'sin': {code: 'sin()'},
-    'conj': {code: 'conjugate()'},
-    'neg': {code: 'neg()'},
-    'inv': {code: 'inverse()'}
+    'len': {code: 'len'},
+    'abs': {code: 'cabs'},
+    'sin': {code: 'sin'},
+    'conj': {code: 'conjugate'},
+    'neg': {code: 'neg'},
+    'inv': {code: 'inverse'}
   },
 
   SHADER_STRINGS: {

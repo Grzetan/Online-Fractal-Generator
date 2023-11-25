@@ -24,25 +24,28 @@ function removeAfterChar(inputString, charToRemove) {
 }
 
 function extractStringInParentheses(inputString) {
-  const regex = /\(([^)]+)\)/;
-  const match = inputString.match(regex);
-
-  if (match && match.length > 1) {
-    return match[1];
+  let start, end;
+  for(let i=0; i<inputString.length; i++){
+    if(inputString[i] == '['){
+      start = i;
+    }else if(inputString[i] == ']'){
+      end = i;
+    }
   }
 
-  return null;
+  return inputString.slice(start+1, end);
 }
 
 function RPN2Code(formula) {
   let splitted = formula.split(' ')
 
   for (let i = 0; i < splitted.length; i++) {
-    let operation = removeAfterChar(splitted[i], '(');
+    let operation = removeAfterChar(splitted[i], '[');
     if (Object.keys(CONSTS.FUNCTIONS).includes(operation)) {
+      console.log(splitted[i]);
       let content = extractStringInParentheses(splitted[i]);
       console.log(content);
-      splitted[i] = content + '.' + CONSTS.FUNCTIONS[operation].code;
+      splitted[i] = CONSTS.FUNCTIONS[operation].code + "(" + content + ")";
     }
   }
 

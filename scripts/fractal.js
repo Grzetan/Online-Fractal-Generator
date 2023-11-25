@@ -20,6 +20,22 @@ vec2 div(vec2 a, vec2 b){
   return vec2(((a.x*b.x+a.y*b.y)/(b.x*b.x+b.y*b.y)),((a.y*b.x-a.x*b.y)/(b.x*b.x+b.y*b.y)));
 }
 
+vec2 len(vec2 a){
+  return vec2(length(a), 0.0);
+}
+
+float abs_(float a){
+  if(a >= 0.0){
+    return a;
+  }
+
+  return -a;
+}
+
+vec2 cabs(vec2 a){
+  return vec2(abs_(a.x), abs_(a.y));
+}
+
 vec2 power(vec2 z, vec2 w) {
   float r = length(z);
   float theta = atan(z.y, z.x);

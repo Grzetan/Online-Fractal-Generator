@@ -4,18 +4,18 @@ import {Renderer} from './renderer.js';
 import {getFragmentShaderWithFormula, setupParamsForms} from './utils.js';
 
 let settings = {
-  formula: '(z^3-1)/(3*z^2)',
-  iteration: CONSTS.ITERATION_METHOD.SUBTRACTION,
-  color: CONSTS.COLOR_METHOD.ROOTS,
-  escape_type: CONSTS.ESCAPE_TYPE.LESS_THAN,
-  escape_value: 1e-6,
+  formula: 'abs[z]^2+a',
+  iteration: CONSTS.ITERATION_METHOD.RECURSION,
+  color: CONSTS.COLOR_METHOD.ITERATIONS,
+  escape_type: CONSTS.ESCAPE_TYPE.GREATER_THAN,
+  escape_value: 2,
   max_iterations: 400,
-  variables: [{name: 'z', type: CONSTS.TYPES.RELATIVE, main: true}]
+  variables: [{name: 'z', type: CONSTS.TYPES.STATIC, real: 0, imaginary: 0, main: true}, {name: "a", type: CONSTS.TYPES.RELATIVE}]
 }
 
 const renderer = new Renderer('canvas');
 
-setupParamsForms(settings);
+setupParamsForms(settings, renderer);
 
 let button_submit = document.getElementById('formula-submit');
 let formula_input = document.getElementById('formula');
