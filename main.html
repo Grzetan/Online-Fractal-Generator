@@ -50,9 +50,11 @@
     <input id='max-iterations' type="number" min="0" max="5000" step=1 value="500"><br>
     <button id="formula-submit">Generate Fractal</button>
   </div>
-  <script src="vertex.js"></script>
-  <script src="mandelbrotFractal.js"></script>
-  <script src="netwonFractal.js"></script>
-  <script src="main.js"></script>
+  <script src="./scripts/vertex.js" type="module"></script>
+  <script src="./scripts/fractal.js" type="module"></script>
+  <script src="./scripts/renderer.js" type="module"></script>
+  <script src="./scripts/formula-processing.js" type="module"></script>
+  <script src="./scripts/update-fragment-shader.js" type="module"></script>
+  <script src="./scripts/main.js" type="module"></script>
 </body>
 </html>

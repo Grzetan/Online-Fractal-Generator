@@ -1,4 +1,4 @@
-window.newtonFragmentShader = `
+export let fragmentShaderCode = `
 precision mediump float;
 
 vec2 start = vec2(-2.0, -1.5);
@@ -81,7 +81,7 @@ void main() {
   }
   // Color by iterations it took to escape
   else if(u_color_method == 2){
-    gl_FragColor = escaped ? vec4((float(iterations) / float(max_iterations)), 1.0, 1.0, 1.0) : vec4(vec3(0.0), 1.0);
+    gl_FragColor = escaped ? vec4(vec3((float(iterations) / float(max_iterations))), 1.0) : vec4(vec3(0.0), 1.0);
   }else{
     gl_FragColor = vec4(vec3(0.0), 1.0);
     //gl_FragColor = escaped ? vec4((main.x + 2.0) / 4.0, (main.y + 2.0) / 4.0, 1.0, 1.0) : vec4(vec3(0.0), 1.0);
