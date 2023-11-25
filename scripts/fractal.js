@@ -1,9 +1,6 @@
 export let fragmentShaderCode = `
 precision mediump float;
 
-vec2 start = vec2(-2.0, -1.5);
-vec2 plane_length = vec2(4.0, 3.0);
-
 vec2 add(vec2 a, vec2 b){
   return a + b;
 }
@@ -51,17 +48,20 @@ vec2 power(vec2 z, vec2 w) {
   return vec2(r_*cos(theta_), r_*sin(theta_));
 }
 
-vec2 getRelativeValue(vec2 uv){
-  return vec2(uv.x * plane_length.x + start.x, uv.y * plane_length.y + start.y);
-}
-
 uniform int u_color_method;
 
 uniform vec2 u_resolution;
 
 uniform int max_iterations;
 
+uniform vec2 plane_start;
+uniform vec2 plane_length;
+
 //PASTE CONST VARIABLES HERE
+
+vec2 getRelativeValue(vec2 uv){
+  return vec2(uv.x * plane_length.x + plane_start.x, uv.y * plane_length.y + plane_start.y);
+}
 
 void main() {
   vec2 uv = gl_FragCoord.xy / u_resolution;
@@ -100,9 +100,6 @@ void main() {
     gl_FragColor = escaped ? vec4(vec3((float(iterations) / float(max_iterations))), 1.0) : vec4(vec3(0.0), 1.0);
   }else{
     gl_FragColor = vec4(vec3(0.0), 1.0);
-    //gl_FragColor = escaped ? vec4((main.x + 2.0) / 4.0, (main.y + 2.0) / 4.0, 1.0, 1.0) : vec4(vec3(0.0), 1.0);
-
   }
-
 }
 `;

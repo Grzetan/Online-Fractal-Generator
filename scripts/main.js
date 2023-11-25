@@ -10,6 +10,8 @@ let settings = {
   escape_type: CONSTS.ESCAPE_TYPE.GREATER_THAN,
   escape_value: 2,
   max_iterations: 400,
+  plane_start: {x: -2, y: -1.5},
+  plane_length: {x: 4, y: 3},
   variables: [{name: 'z', type: CONSTS.TYPES.STATIC, real: 0, imaginary: 0, main: true}, {name: "a", type: CONSTS.TYPES.RELATIVE}]
 }
 
@@ -38,6 +40,7 @@ escape_type_input.value = settings.escape_type;
 escape_value_input.value = settings.escape_value;
 max_iterations_input.value = settings.max_iterations;
 
+// Form events
 add_param_btn.addEventListener('click', e => {
   settings.variables.push({name: curr, type: CONSTS.TYPES.RELATIVE});
   curr = String.fromCharCode(curr.charCodeAt() + 1);
@@ -76,6 +79,22 @@ button_submit.addEventListener('click', (e) => {
   generateFractal(settings);
 });
 
+// Scroll & drag
+window.addEventListener('wheel', e=>{
+  const zoom_dir = (e.deltaY > 0) ? 1 : -1;
+
+  const zoom_diff_x = settings.plane_length.x * CONSTS.ZOOM_POWER;
+  const zoom_diff_y = settings.plane_length.y * CONSTS.ZOOM_POWER;
+  settings.plane_length.x += zoom_diff_x * zoom_dir;
+  settings.plane_length.y += zoom_diff_y * zoom_dir;
+  settings.plane_start.x -= zoom_diff_x * zoom_dir / 2;
+  settings.plane_start.y -= zoom_diff_y * zoom_dir / 2;
+
+  renderer.updateVariable('plane_start', settings.plane_start.x, settings.plane_start.y);
+  renderer.updateVariable('plane_length', settings.plane_length.x, settings.plane_length.y);
+  renderer.render();
+});
+
 function generateFractal(settings) {
   const fractalCode = formula2Code(settings.formula);
   const fragmentShader = getFragmentShaderWithFormula(fractalCode, settings);
@@ -88,6 +107,8 @@ function generateFractal(settings) {
 
   renderer.updateParam('u_color_method', settings.color);
   renderer.updateParam('max_iterations', settings.max_iterations);
+  renderer.updateVariable('plane_start', settings.plane_start.x, settings.plane_start.y);
+  renderer.updateVariable('plane_length', settings.plane_length.x, settings.plane_length.y);
 
   renderer.render();
 }
