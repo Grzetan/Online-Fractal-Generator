@@ -25,15 +25,15 @@ function removeAfterChar(inputString, charToRemove) {
 
 function extractStringInParentheses(inputString) {
   let start, end;
-  for(let i=0; i<inputString.length; i++){
-    if(inputString[i] == '['){
+  for (let i = 0; i < inputString.length; i++) {
+    if (inputString[i] == '[') {
       start = i;
-    }else if(inputString[i] == ']'){
+    } else if (inputString[i] == ']') {
       end = i;
     }
   }
 
-  return inputString.slice(start+1, end);
+  return inputString.slice(start + 1, end);
 }
 
 function RPN2Code(formula) {
@@ -43,7 +43,7 @@ function RPN2Code(formula) {
     let operation = removeAfterChar(splitted[i], '[');
     if (Object.keys(CONSTS.FUNCTIONS).includes(operation)) {
       let content = extractStringInParentheses(splitted[i]);
-      splitted[i] = CONSTS.FUNCTIONS[operation].code + "(" + content + ")";
+      splitted[i] = CONSTS.FUNCTIONS[operation].code + '(' + content + ')';
     }
   }
 

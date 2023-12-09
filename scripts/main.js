@@ -1,23 +1,9 @@
-import {CONSTS} from './config.js';
-import {formula2Code} from './formula-processing.js'
-import {Renderer} from './renderer.js';
-import {getFragmentShaderWithFormula, setupParamsForms} from './utils.js';
+import { CONSTS, settings } from './config.js';
+import { formula2Code } from './formula-processing.js'
+import { renderer } from './renderer.js';
+import { getFragmentShaderWithFormula, setupParamsForms } from './utils.js';
 
-let settings = {
-  formula: 'abs[z]^2+a',
-  iteration: CONSTS.ITERATION_METHOD.RECURSION,
-  color: CONSTS.COLOR_METHOD.ITERATIONS,
-  escape_type: CONSTS.ESCAPE_TYPE.GREATER_THAN,
-  escape_value: 2,
-  max_iterations: 400,
-  plane_start: {x: -2, y: -1.5},
-  plane_length: {x: 4, y: 3},
-  variables: [{name: 'z', type: CONSTS.TYPES.STATIC, real: 0, imaginary: 0, main: true}, {name: "a", type: CONSTS.TYPES.RELATIVE}]
-}
-
-const renderer = new Renderer('canvas');
-
-setupParamsForms(settings, renderer);
+setupParamsForms();
 
 let button_submit = document.getElementById('formula-submit');
 let formula_input = document.getElementById('formula');
@@ -42,9 +28,9 @@ max_iterations_input.value = settings.max_iterations;
 
 // Form events
 add_param_btn.addEventListener('click', e => {
-  settings.variables.push({name: curr, type: CONSTS.TYPES.RELATIVE});
+  settings.variables.push({ name: curr, type: CONSTS.TYPES.RELATIVE });
   curr = String.fromCharCode(curr.charCodeAt() + 1);
-  setupParamsForms(settings);
+  setupParamsForms();
 })
 
 color_input.addEventListener('input', e => {
@@ -55,17 +41,17 @@ color_input.addEventListener('input', e => {
 
 operation_input.addEventListener('input', e => {
   settings.iteration = operation_input.value;
-  generateFractal(settings);
+  generateFractal();
 })
 
 escape_type_input.addEventListener('input', e => {
   settings.escape_type = escape_type_input.value;
-  generateFractal(settings);
+  generateFractal();
 })
 
 escape_value_input.addEventListener('input', e => {
   settings.escape_value = escape_value_input.value;
-  generateFractal(settings);
+  generateFractal();
 })
 
 max_iterations_input.addEventListener('input', e => {
@@ -76,11 +62,11 @@ max_iterations_input.addEventListener('input', e => {
 
 button_submit.addEventListener('click', (e) => {
   settings.formula = formula_input.value;
-  generateFractal(settings);
+  generateFractal();
 });
 
 // Scroll & drag
-window.addEventListener('wheel', e=>{
+window.addEventListener('wheel', e => {
   const zoom_dir = (e.deltaY > 0) ? 1 : -1;
 
   const zoom_diff_x = settings.plane_length.x * CONSTS.ZOOM_POWER;
@@ -90,33 +76,53 @@ window.addEventListener('wheel', e=>{
   settings.plane_start.x -= zoom_diff_x * zoom_dir / 2;
   settings.plane_start.y -= zoom_diff_y * zoom_dir / 2;
 
-  renderer.updateVariable('plane_start', settings.plane_start.x, settings.plane_start.y);
-  renderer.updateVariable('plane_length', settings.plane_length.x, settings.plane_length.y);
+  renderer.updateVariable(
+    'plane_start', settings.plane_start.x, settings.plane_start.y);
+  renderer.updateVariable(
+    'plane_length', settings.plane_length.x, settings.plane_length.y);
   renderer.render();
 });
 
 // Buttons
-document.getElementById("toggle-form-button").addEventListener("click", function() {
-  var container = document.getElementById("container");
-  container.style.display = container.style.display === "none" ? "flex" : "none";
-});
+document.getElementById('toggle-form-button')
+  .addEventListener('click', function () {
+    var container = document.getElementById('container');
+    container.style.display =
+      container.style.display === 'none' ? 'flex' : 'none';
+  });
 
 let curr_img = 0;
-document.getElementById('save').addEventListener('click', e=>{
-  var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
-  window.location.href=image; // it will save locally
+document.getElementById('save').addEventListener('click', e => {
+  var image = canvas.toDataURL('image/png')
+    .replace(
+      'image/png',
+      'image/octet-stream');  // here is the most important part
+  // because if you dont replace you
+  // will get a DOM 18 exception.
+  window.location.href = image;               // it will save locally
 })
+
+document.getElementById('save-settings').addEventListener('click', e => {
+  console.log(JSON.stringify(settings))
+  const link = document.createElement("a");
+  const file = new Blob([JSON.stringify(settings)], { type: 'text/plain' });
+  link.href = URL.createObjectURL(file);
+  link.download = "fractal.txt";
+  link.click();
+  URL.revokeObjectURL(link.href);
+})
+
 
 let last_pos = null;
 
-window.addEventListener('mousemove', e=>{
-  if(e.buttons != 1){
+window.addEventListener('mousemove', e => {
+  if (e.buttons != 1) {
     last_pos = null;
     return;
   }
 
-  if(last_pos == null){
-    last_pos = {x: e.clientX, y: e.clientY};
+  if (last_pos == null) {
+    last_pos = { x: e.clientX, y: e.clientY };
     return;
   }
 
@@ -124,16 +130,17 @@ window.addEventListener('mousemove', e=>{
   const moved_y_ratio = (e.clientY - last_pos.y) / window.innerHeight;
   settings.plane_start.x -= moved_x_ratio * settings.plane_length.x;
   settings.plane_start.y += moved_y_ratio * settings.plane_length.y;
-  renderer.updateVariable("plane_start", settings.plane_start.x, settings.plane_start.y);
+  renderer.updateVariable(
+    'plane_start', settings.plane_start.x, settings.plane_start.y);
   renderer.render();
 
   last_pos.x = e.clientX;
   last_pos.y = e.clientY;
 })
 
-export function generateFractal(settings) {
+export function generateFractal() {
   const fractalCode = formula2Code(settings.formula);
-  const fragmentShader = getFragmentShaderWithFormula(fractalCode, settings);
+  const fragmentShader = getFragmentShaderWithFormula(fractalCode);
   console.log(fragmentShader);
   renderer.updateFragmentShader(fragmentShader);
 
@@ -143,10 +150,12 @@ export function generateFractal(settings) {
 
   renderer.updateParam('u_color_method', settings.color);
   renderer.updateParam('max_iterations', settings.max_iterations);
-  renderer.updateVariable('plane_start', settings.plane_start.x, settings.plane_start.y);
-  renderer.updateVariable('plane_length', settings.plane_length.x, settings.plane_length.y);
+  renderer.updateVariable(
+    'plane_start', settings.plane_start.x, settings.plane_start.y);
+  renderer.updateVariable(
+    'plane_length', settings.plane_length.x, settings.plane_length.y);
 
   renderer.render();
 }
 
-generateFractal(settings);
+generateFractal();

@@ -1,6 +1,6 @@
 import {vertexShaderCode} from './vertex.js';
 
-export class Renderer {
+class Renderer {
   vertices = [-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1];
 
   constructor(canvas_id) {
@@ -78,3 +78,5 @@ export class Renderer {
     this.gl.uniform1i(param, val);
   }
 }
+
+export const renderer = new Renderer('canvas');

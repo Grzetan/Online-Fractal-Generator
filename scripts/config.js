@@ -40,3 +40,15 @@ export const CONSTS = {
 
   ZOOM_POWER: 0.05
 }
+
+export let settings = {
+  formula: '(z^3-1)/(3*z^2)',
+  iteration: CONSTS.ITERATION_METHOD.SUBTRACTION,
+  color: CONSTS.COLOR_METHOD.ROOTS,
+  escape_type: CONSTS.ESCAPE_TYPE.LESS_THAN,
+  escape_value: 1e-6,
+  max_iterations: 400,
+  plane_start: {x: -2, y: -1.5},
+  plane_length: {x: 4, y: 3},
+  variables: [{name: 'z', type: CONSTS.TYPES.RELATIVE, main: true}]
+}
