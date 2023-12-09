@@ -1,4 +1,4 @@
-import { CONSTS, settings } from './config.js';
+import { CONSTS, settings, setSettings } from './config.js';
 import { formula2Code } from './formula-processing.js'
 import { renderer } from './renderer.js';
 import { getFragmentShaderWithFormula, setupParamsForms } from './utils.js';
@@ -103,13 +103,32 @@ document.getElementById('save').addEventListener('click', e => {
 })
 
 document.getElementById('save-settings').addEventListener('click', e => {
-  console.log(JSON.stringify(settings))
   const link = document.createElement("a");
   const file = new Blob([JSON.stringify(settings)], { type: 'text/plain' });
   link.href = URL.createObjectURL(file);
-  link.download = "fractal.txt";
+  link.download = "fractal.json";
   link.click();
   URL.revokeObjectURL(link.href);
+})
+
+const file = document.getElementById('load-settings-file');
+
+document.getElementById('load-settings').addEventListener('click', e => {
+  file.click();
+})
+
+file.addEventListener("change", e => {
+  var reader = new FileReader();
+  reader.readAsText(file.files[0], "UTF-8");
+  reader.onload = function (evt) {
+    console.log(evt.target.result);
+    setSettings(JSON.parse(evt.target.result));
+    setupParamsForms();
+    generateFractal();
+  }
+  reader.onerror = function (evt) {
+    alert("There was an error with loading the file");
+  }
 })
 
 

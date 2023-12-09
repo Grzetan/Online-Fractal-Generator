@@ -1,5 +1,5 @@
 export const CONSTS = {
-  TYPES: {STATIC: 'const', RELATIVE: 'relative'},
+  TYPES: { STATIC: 'const', RELATIVE: 'relative' },
 
   ITERATION_METHOD: {
     RECURSION: 'recursion',
@@ -7,25 +7,25 @@ export const CONSTS = {
     SUBTRACTION: 'subtraction'
   },
 
-  COLOR_METHOD: {ROOTS: 1, ITERATIONS: 2},
+  COLOR_METHOD: { ROOTS: 1, ITERATIONS: 2 },
 
-  ESCAPE_TYPE: {GREATER_THAN: '>', LESS_THAN: '<'},
+  ESCAPE_TYPE: { GREATER_THAN: '>', LESS_THAN: '<' },
 
   OPERATORS: {
-    '-': {code: 'subtract(', associativity: 'left', precedence: 1},
-    '+': {code: 'add(', associativity: 'left', precedence: 1},
-    '/': {code: 'div(', associativity: 'left', precedence: 2},
-    '*': {code: 'mul(', associativity: 'left', precedence: 2},
-    '^': {code: 'power(', associativity: 'right', precedence: 3}
+    '-': { code: 'subtract(', associativity: 'left', precedence: 1 },
+    '+': { code: 'add(', associativity: 'left', precedence: 1 },
+    '/': { code: 'div(', associativity: 'left', precedence: 2 },
+    '*': { code: 'mul(', associativity: 'left', precedence: 2 },
+    '^': { code: 'power(', associativity: 'right', precedence: 3 }
   },
 
   FUNCTIONS: {
-    'len': {code: 'len'},
-    'abs': {code: 'cabs'},
-    'sin': {code: 'sin'},
-    'conj': {code: 'conjugate'},
-    'neg': {code: 'neg'},
-    'inv': {code: 'inverse'}
+    'len': { code: 'len' },
+    'abs': { code: 'cabs' },
+    'sin': { code: 'sin' },
+    'conj': { code: 'conjugate' },
+    'neg': { code: 'neg' },
+    'inv': { code: 'inverse' }
   },
 
   SHADER_STRINGS: {
@@ -48,7 +48,11 @@ export let settings = {
   escape_type: CONSTS.ESCAPE_TYPE.LESS_THAN,
   escape_value: 1e-6,
   max_iterations: 400,
-  plane_start: {x: -2, y: -1.5},
-  plane_length: {x: 4, y: 3},
-  variables: [{name: 'z', type: CONSTS.TYPES.RELATIVE, main: true}]
+  plane_start: { x: -2, y: -1.5 },
+  plane_length: { x: 4, y: 3 },
+  variables: [{ name: 'z', type: CONSTS.TYPES.RELATIVE, main: true }]
+}
+
+export function setSettings(new_settings) {
+  settings = new_settings;
 }
