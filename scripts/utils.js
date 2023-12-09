@@ -1,7 +1,7 @@
-import {CONSTS, settings} from './config.js';
-import {fragmentShaderCode} from './fractal.js'
-import {generateFractal} from './main.js';
-import {renderer} from './renderer.js';
+import { CONSTS, settings } from './config.js';
+import { fragmentShaderCode } from './fractal.js'
+import { generateFractal } from './main.js';
+import { renderer } from './renderer.js';
 
 export function getFragmentShaderWithFormula(formula) {
   let code = fragmentShaderCode;
@@ -13,7 +13,7 @@ export function getFragmentShaderWithFormula(formula) {
   });
   const_variables_code = const_variables_code.slice(0, -1) + ';';
   code =
-      code.replaceAll(CONSTS.SHADER_STRINGS.CONST_PARAMS, const_variables_code);
+    code.replaceAll(CONSTS.SHADER_STRINGS.CONST_PARAMS, const_variables_code);
 
   // Setup relative params
   let relative_variables_code = 'vec2 ';
@@ -22,17 +22,17 @@ export function getFragmentShaderWithFormula(formula) {
   });
   relative_variables_code = relative_variables_code.slice(0, -1) + ';';
   code = code.replaceAll(
-      CONSTS.SHADER_STRINGS.RELATIVE_PARAMS, relative_variables_code);
+    CONSTS.SHADER_STRINGS.RELATIVE_PARAMS, relative_variables_code);
 
   // Setup main param
-  var main_param = settings.variables.find(obj => {return obj.main})
+  var main_param = settings.variables.find(obj => { return obj.main })
 
   if (main_param == undefined) {
     throw new Error('There is no main variable');
   }
 
   code =
-      code.replaceAll(CONSTS.SHADER_STRINGS.MAIN_PARAM, main_param.name + ';');
+    code.replaceAll(CONSTS.SHADER_STRINGS.MAIN_PARAM, main_param.name + ';');
 
   // Replace main param with custom name
   formula = formula.replaceAll(main_param.name, 'main');
@@ -55,7 +55,7 @@ export function getFragmentShaderWithFormula(formula) {
 
   // Replace escape condition
   let escape_code =
-      settings.escape_type + ' ' + Number(settings.escape_value).toFixed(12);
+    settings.escape_type + ' ' + Number(settings.escape_value).toFixed(12);
   code = code.replaceAll(CONSTS.SHADER_STRINGS.ESCAPE_CONDITION, escape_code);
 
   return code.replaceAll(CONSTS.SHADER_STRINGS.FORMULA, formula + ';');
@@ -86,8 +86,8 @@ export function setupParamsForms() {
     real.addEventListener('input', r => {
       settings.variables[i].real = Number(real.value);
       renderer.updateVariable(
-          settings.variables[i].name, settings.variables[i].real,
-          settings.variables[i].imaginary);
+        settings.variables[i].name, settings.variables[i].real,
+        settings.variables[i].imaginary);
       renderer.render();
     })
     real.disabled = settings.variables[i].type == CONSTS.TYPES.RELATIVE;
@@ -105,8 +105,8 @@ export function setupParamsForms() {
     imag.addEventListener('input', r => {
       settings.variables[i].imaginary = Number(imag.value);
       renderer.updateVariable(
-          settings.variables[i].name, settings.variables[i].real,
-          settings.variables[i].imaginary);
+        settings.variables[i].name, settings.variables[i].real,
+        settings.variables[i].imaginary);
       renderer.render();
     })
     imag.disabled = settings.variables[i].type == CONSTS.TYPES.RELATIVE;
@@ -123,6 +123,7 @@ export function setupParamsForms() {
       }
       type.appendChild(option);
     }
+    type.value = settings.variables[i].type;
     type.addEventListener('input', r => {
       settings.variables[i].type = type.value;
       if (settings.variables[i].type == CONSTS.TYPES.STATIC) {
@@ -160,7 +161,7 @@ export function setupParamsForms() {
       let remove = document.createElement('button');
       remove.innerText = 'Remove';
       remove.addEventListener('click', r => {
-        settings.variables = settings.variables.filter(k => {return k != e});
+        settings.variables = settings.variables.filter(k => { return k != e });
         setupParamsForms(settings);
         generateFractal(settings);
       })
