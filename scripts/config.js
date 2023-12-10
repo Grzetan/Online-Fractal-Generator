@@ -56,3 +56,13 @@ export let settings = {
 export function setSettings(new_settings) {
   settings = new_settings;
 }
+
+function adjustProportions() {
+  const starting_width = 6;
+
+  const plane_start_y = -(window.innerHeight / window.innerWidth) * starting_width / 2;
+  settings.plane_length = { x: starting_width, y: (window.innerHeight / window.innerWidth) * starting_width };
+  settings.plane_start = { x: -starting_width / 2, y: plane_start_y };
+}
+
+adjustProportions()
