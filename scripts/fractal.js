@@ -48,6 +48,30 @@ vec2 power(vec2 z, vec2 w) {
   return vec2(r_*cos(theta_), r_*sin(theta_));
 }
 
+float sinh(float a){
+  return (exp(a) - exp(-a)) / 2.0;
+}
+
+float cosh(float a){
+  return (exp(a) + exp(-a)) / 2.0;
+}
+
+vec2 csinh(vec2 a){
+  return vec2(sinh(a.x) * cos(a.y), cosh(a.x) * sin(a.y));
+}
+
+vec2 ccosh(vec2 a){
+  return vec2(cosh(a.x) * cos(a.y), sinh(a.x) * sin(a.y));
+}
+
+vec2 csin(vec2 a){
+  return vec2(sin(a.x) * cosh(a.y), cos(a.x) * sinh(a.y));
+}
+
+vec2 ccos(vec2 a){
+  return vec2(cos(a.x) * cosh(a.y), sin(a.x) * sinh(a.y));
+}
+
 uniform int u_color_method;
 
 uniform vec2 u_resolution;

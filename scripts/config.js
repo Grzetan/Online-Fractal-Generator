@@ -22,10 +22,14 @@ export const CONSTS = {
   FUNCTIONS: {
     'len': { code: 'len' },
     'abs': { code: 'cabs' },
-    'sin': { code: 'sin' },
-    'conj': { code: 'conjugate' },
-    'neg': { code: 'neg' },
-    'inv': { code: 'inverse' }
+    'sin': { code: 'csin' },
+    'cos': { code: 'ccos' },
+    'sinh': { code: 'csinh' },
+    'cosh': { code: 'ccosh' },
+
+    // 'conj': { code: 'conjugate' },
+    // 'neg': { code: 'neg' },
+    // 'inv': { code: 'inverse' }
   },
 
   SHADER_STRINGS: {
