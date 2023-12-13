@@ -81,7 +81,7 @@ export function setupParamsForms() {
 
     let real = document.createElement('input');
     real.type = 'number';
-    real.step = 0.01;
+    real.step = 0.05;
     real.value = settings.variables[i].real;
     real.addEventListener('input', r => {
       settings.variables[i].real = Number(real.value);
@@ -100,7 +100,7 @@ export function setupParamsForms() {
 
     let imag = document.createElement('input');
     imag.type = 'number';
-    imag.step = 0.01;
+    imag.step = 0.05;
     imag.value = settings.variables[i].imaginary;
     imag.addEventListener('input', r => {
       settings.variables[i].imaginary = Number(imag.value);

@@ -133,9 +133,18 @@ file.addEventListener("change", e => {
 
 
 let last_pos = null;
+let allow_drag = false;
+
+document.getElementById('canvas').addEventListener('mousedown', e => {
+  allow_drag = true;
+})
+
+window.addEventListener("mouseup", e => {
+  allow_drag = false;
+})
 
 window.addEventListener('mousemove', e => {
-  if (e.buttons != 1) {
+  if (e.buttons != 1 || !allow_drag) {
     last_pos = null;
     return;
   }
