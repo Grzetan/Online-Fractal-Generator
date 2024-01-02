@@ -91,7 +91,6 @@ document.getElementById('toggle-form-button')
       container.style.display === 'none' ? 'flex' : 'none';
   });
 
-let curr_img = 0;
 document.getElementById('save').addEventListener('click', e => {
   var image = canvas.toDataURL('image/png')
     .replace(
@@ -100,6 +99,50 @@ document.getElementById('save').addEventListener('click', e => {
   // because if you dont replace you
   // will get a DOM 18 exception.
   window.location.href = image;               // it will save locally
+})
+
+// Video render (it was used to screen record the fractal)
+let param = null, part = null;
+
+document.addEventListener("keyup", e => {
+  console.log(e)
+})
+
+function changeValue(val) {
+  if (param && part) {
+    settings.variables.forEach(variable => {
+      if (variable.name == param) {
+        if (part == 'imag') {
+          variable.imaginary += val * 0.01;
+          renderer.updateVariable(
+            variable.name, variable.real,
+            variable.imaginary);
+          renderer.render();
+        } else {
+          variable.real += val * 0.01;
+          renderer.updateVariable(
+            variable.name, variable.real,
+            variable.imaginary);
+          renderer.render();
+        }
+      }
+    })
+  }
+}
+
+document.addEventListener("keydown", e => {
+  console.log(e)
+  if (e.key == 'i') {
+    part = 'imag';
+  } else if (e.key == 'r') {
+    part = 'real';
+  } else if (e.key == 'ArrowUp') {
+    changeValue(1);
+  } else if (e.key == 'ArrowDown') {
+    changeValue(-1);
+  } else {
+    param = e.key;
+  }
 })
 
 document.getElementById('save-settings').addEventListener('click', e => {
