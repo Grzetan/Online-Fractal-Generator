@@ -130,6 +130,21 @@ function changeValue(val) {
   }
 }
 
+function handleZoom(zoom_dir) {
+  const zoom_diff_x = settings.plane_length.x * (CONSTS.ZOOM_POWER / 2);
+  const zoom_diff_y = settings.plane_length.y * (CONSTS.ZOOM_POWER / 2);
+  settings.plane_length.x += zoom_diff_x * zoom_dir;
+  settings.plane_length.y += zoom_diff_y * zoom_dir;
+  settings.plane_start.x -= zoom_diff_x * zoom_dir / 2;
+  settings.plane_start.y -= zoom_diff_y * zoom_dir / 2;
+
+  renderer.updateVariable(
+    'plane_start', settings.plane_start.x, settings.plane_start.y);
+  renderer.updateVariable(
+    'plane_length', settings.plane_length.x, settings.plane_length.y);
+  renderer.render();
+}
+
 document.addEventListener("keydown", e => {
   console.log(e)
   if (e.key == 'i') {
@@ -140,6 +155,10 @@ document.addEventListener("keydown", e => {
     changeValue(1);
   } else if (e.key == 'ArrowDown') {
     changeValue(-1);
+  } else if (e.key == 'ArrowLeft') {
+    handleZoom(1);
+  } else if (e.key == 'ArrowRight') {
+    handleZoom(-1);
   } else {
     param = e.key;
   }
