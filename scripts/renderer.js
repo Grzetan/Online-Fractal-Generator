@@ -1,4 +1,4 @@
-import {vertexShaderCode} from './vertex.js';
+import { vertexShaderCode } from './vertex.js';
 
 class Renderer {
   vertices = [-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1];
@@ -17,8 +17,8 @@ class Renderer {
     this.vertexBuffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
     this.gl.bufferData(
-        this.gl.ARRAY_BUFFER, new Float32Array(this.vertices),
-        this.gl.STATIC_DRAW);
+      this.gl.ARRAY_BUFFER, new Float32Array(this.vertices),
+      this.gl.STATIC_DRAW);
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
 
     // Feed GPU with VERTEX shader and compile
@@ -41,10 +41,10 @@ class Renderer {
     this.gl.shaderSource(this.fragShader, fragmentShader);
     this.gl.compileShader(this.fragShader);
     console
-        .log(this.gl.getShaderInfoLog(this.fragShader))
+      .log(this.gl.getShaderInfoLog(this.fragShader))
 
-        // Initialize rendering program
-        this.gl.attachShader(this.shaderProgram, this.fragShader);
+    // Initialize rendering program
+    this.gl.attachShader(this.shaderProgram, this.fragShader);
     this.gl.linkProgram(this.shaderProgram);
     this.gl.useProgram(this.shaderProgram);
 
@@ -60,7 +60,7 @@ class Renderer {
     this.gl.viewport(0, 0, canvas.width, canvas.height);
 
     const resolution =
-        this.gl.getUniformLocation(this.shaderProgram, 'u_resolution');
+      this.gl.getUniformLocation(this.shaderProgram, 'u_resolution');
     this.gl.uniform2f(resolution, this.canvas.width, this.canvas.height);
   }
 

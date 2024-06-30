@@ -6,6 +6,7 @@ import { getFragmentShaderWithFormula, setupParamsForms } from './utils.js';
 setupParamsForms();
 
 let button_submit = document.getElementById('formula-submit');
+let button_random = document.getElementById('random-submit');
 let formula_input = document.getElementById('formula');
 let color_input = document.getElementById('color-method');
 let operation_input = document.getElementById('main-operation');
@@ -64,6 +65,14 @@ button_submit.addEventListener('click', (e) => {
   settings.formula = formula_input.value;
   generateFractal();
 });
+
+button_random.addEventListener('click', (e)=>{
+  const formula = getRandomFormula();
+  formula_input.value = formula;
+  settings.formula = formula;
+  generateFractal();
+  console.log(formula)
+})
 
 // Scroll & drag
 window.addEventListener('wheel', e => {
@@ -231,7 +240,7 @@ window.addEventListener('mousemove', e => {
 export function generateFractal() {
   const fractalCode = formula2Code(settings.formula);
   const fragmentShader = getFragmentShaderWithFormula(fractalCode);
-  console.log(fragmentShader);
+  // console.log(fragmentShader);
   renderer.updateFragmentShader(fragmentShader);
 
   settings.variables.filter(a => a.type == CONSTS.TYPES.STATIC).forEach(e => {
@@ -248,4 +257,65 @@ export function generateFractal() {
   renderer.render();
 }
 
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function createFxFromCoefs(stage, coefs){
+  let fx = "";
+  coefs.forEach((item, index)=>{
+    if(item == 0){
+      return;
+    }
+
+    const currentStage = stage - index;
+
+    if(fx != "" && item >= 0){
+      fx += "+"
+    }
+    fx += item.toString();
+    if(currentStage >= 1){
+      fx += "*z"
+    }
+    if(currentStage >= 2){
+      fx += "^" + currentStage
+    }
+  })
+
+  return fx
+}
+
+function createFprimexFromCoefs(stage, coefs){
+  let fprime = "";
+  const newStage = stage - 1;
+  let newCoefs = [...coefs];
+  newCoefs.pop()
+
+  newCoefs = newCoefs.map((item, index)=>{
+    const currentStage = stage - index;
+    return currentStage * item;
+  })
+
+  return createFxFromCoefs(newStage, newCoefs)
+}
+
+export function getRandomFormula(){
+  const stage = getRandomInt(2, 7);
+  const coefficients = Array(stage);
+  for(let i=0; i<=stage; i++){
+    coefficients[i] = getRandomInt(-10, 10)
+  }
+
+  const fx = createFxFromCoefs(stage, coefficients);
+  const fprimex = createFprimexFromCoefs(stage, coefficients);
+    
+  let output = `(${fx})/(${fprimex})`
+
+  return output
+}
+
 generateFractal();
+
+getRandomFormula();
