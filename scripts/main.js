@@ -240,7 +240,7 @@ window.addEventListener('mousemove', e => {
 export function generateFractal() {
   const fractalCode = formula2Code(settings.formula);
   const fragmentShader = getFragmentShaderWithFormula(fractalCode);
-  // console.log(fragmentShader);
+  console.log(fragmentShader);
   renderer.updateFragmentShader(fragmentShader);
 
   settings.variables.filter(a => a.type == CONSTS.TYPES.STATIC).forEach(e => {

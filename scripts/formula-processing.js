@@ -75,9 +75,33 @@ function scalarsToComplex(formula) {
   return formula;
 }
 
+function handleUnaryMinuses(formula){
+  formula = formula.filter(i=>{return i != ""})
+  let newFormula = [];
+  for(let i=0; i<formula.length; i++){
+    if(formula[i] == " "){
+      continue
+    }
+
+    if(formula[i] == "-" && (i == 0 || CONSTS.CHARS.includes(formula[i-1]))){
+      newFormula.push("(");
+      newFormula.push("0");
+      newFormula.push("-");
+      newFormula.push(formula[i+1]);
+      newFormula.push(")");
+      i++;
+    }else{
+      newFormula.push(formula[i]);
+    }
+  }
+
+  return newFormula;
+}
+
 // https://www.andreinc.net/2010/10/05/converting-infix-to-rpn-shunting-yard-algorithm
 function formula2RPN(formula) {
   let splitted = formula.split(' ');
+  splitted = handleUnaryMinuses(splitted);
   splitted = splitted.filter(a => a != '');
   splitted = scalarsToComplex(splitted);
 
@@ -124,9 +148,8 @@ export function formula2Code(formula) {
 }
 
 function preprocessFormula(formula) {
-  let chars = ['(', ')', '+', '-', '*', '/', '^'];
-  for (let i = 0; i < chars.length; i++) {
-    formula = formula.split(chars[i]).join(' ' + chars[i] + ' ');
+  for (let i = 0; i < CONSTS.CHARS.length; i++) {
+    formula = formula.split(CONSTS.CHARS[i]).join(' ' + CONSTS.CHARS[i] + ' ');
   }
 
   return formula;

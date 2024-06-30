@@ -1,4 +1,6 @@
 export const CONSTS = {
+  CHARS: ['(', ')', '+', '-', '*', '/', '^'],
+
   TYPES: { STATIC: 'const', RELATIVE: 'relative' },
 
   ITERATION_METHOD: {
